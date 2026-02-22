@@ -4,7 +4,8 @@ import com.library.model.BookDTO;
 import org.springframework.stereotype.Component;
 @Component
 public class BookMapper {
-    private BookMapper() {}
+    private BookMapper() {
+    }
     public static BookDTO toDto(Book book) {
         BookDTO dto = new BookDTO();
         dto.setId(book.getId());
