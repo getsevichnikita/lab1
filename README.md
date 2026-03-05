@@ -11,4 +11,4 @@
 
 В проекте подключен checkstyle
 
-https://sonarcloud.io/organizations/getsevichnikita/projects
+SonarCloud: https://sonarcloud.io/organizations/getsevichnikita/projects
