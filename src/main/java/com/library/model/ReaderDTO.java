@@ -1,0 +1,16 @@
+package com.library.model;
+
+import java.util.List;
+import lombok.*;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class ReaderDTO {
+    private Long id;
+    private String name;
+
+    private List<Long> loanIds;
+}

@@ -11,4 +11,6 @@
 
 В проекте подключен checkstyle
 
+# JPA (Hibernate/Spring Data)
+
 SonarCloud: https://sonarcloud.io/organizations/getsevichnikita/projects
