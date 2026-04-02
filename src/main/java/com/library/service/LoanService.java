@@ -1,5 +1,6 @@
 package com.library.service;
 
+import com.library.exception.BookNotFoundException;
 import com.library.model.Book;
 import com.library.model.Loan;
 import com.library.model.LoanDTO;
@@ -66,19 +67,24 @@ public class LoanService {
                 .map(LoanMapper::toDto)
                 .toList();
     }
-    public void createLoanWithoutTransaction() {
+    private void createLoanInternal(String readerName) {
+
         Reader reader = new Reader();
-        reader.setName("Test Reader");
+        reader.setName(readerName);
         reader = readerRepository.save(reader);
 
         Book book = repository.findById(1L)
-                .orElseThrow();
+                .orElseThrow(() -> new BookNotFoundException(1L));
 
         Loan loan = new Loan();
         loan.setReader(reader);
         loan.setBook(book);
-
         loanRepository.save(loan);
+    }
+
+    public void createLoanWithoutTransaction() {
+
+        createLoanInternal("Test Reader");
 
         if (true) {
             throw new RuntimeException("Ошибка после сохранения!");
@@ -88,18 +94,7 @@ public class LoanService {
     @Transactional
     public void createLoanWithTransaction() {
 
-        Reader reader = new Reader();
-        reader.setName("Transactional Reader");
-        reader = readerRepository.save(reader);
-
-        Book book = repository.findById(1L)
-                .orElseThrow();
-
-        Loan loan = new Loan();
-        loan.setReader(reader);
-        loan.setBook(book);
-
-        loanRepository.save(loan);
+        createLoanInternal("Transactional Reader");
 
         if (true) {
             throw new RuntimeException("Ошибка внутри транзакции!");
