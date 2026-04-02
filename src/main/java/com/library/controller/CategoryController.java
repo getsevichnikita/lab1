@@ -1,6 +1,9 @@
 package com.library.controller;
 
-import com.library.model.Category;
+import com.library.model.CategoryDTO;
+import com.library.mapper.CategoryMapper;
+import com.library.model.Book;
+import com.library.service.BookService;
 import com.library.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -13,25 +16,35 @@ import java.util.List;
 public class CategoryController {
 
     private final CategoryService categoryService;
+    private final BookService bookService;
 
     @GetMapping
-    public List<Category> getAll() {
-        return categoryService.getAll();
+    public List<CategoryDTO> getAll() {
+        return categoryService.getAll().stream()
+                .map(CategoryMapper::toDto)
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public Category getById(@PathVariable Long id) {
-        return categoryService.getById(id);
+    public CategoryDTO getById(@PathVariable Long id) {
+        return CategoryMapper.toDto(categoryService.getById(id));
     }
 
     @PostMapping
-    public Category create(@RequestBody Category category) {
-        return categoryService.save(category);
+    public CategoryDTO create(@RequestBody CategoryDTO dto) {
+        List<Book> books = bookService.getAllByIds(dto.getBookIds());
+        return CategoryMapper.toDto(categoryService.save(
+                CategoryMapper.toEntity(dto, books)
+        ));
     }
 
     @PutMapping("/{id}")
-    public Category update(@PathVariable Long id, @RequestBody Category category) {
-        return categoryService.update(id, category);
+    public CategoryDTO update(@PathVariable Long id, @RequestBody CategoryDTO dto) {
+        List<Book> books = bookService.getAllByIds(dto.getBookIds());
+        return CategoryMapper.toDto(categoryService.update(
+                id,
+                CategoryMapper.toEntity(dto, books)
+        ));
     }
 
     @DeleteMapping("/{id}")

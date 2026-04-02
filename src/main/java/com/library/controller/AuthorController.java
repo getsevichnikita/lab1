@@ -1,7 +1,10 @@
 package com.library.controller;
 
-import com.library.model.Author;
+import com.library.model.AuthorDTO;
+import com.library.mapper.AuthorMapper;
+import com.library.model.Book;
 import com.library.service.AuthorService;
+import com.library.service.BookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,25 +16,35 @@ import java.util.List;
 public class AuthorController {
 
     private final AuthorService authorService;
+    private final BookService bookService;
 
     @GetMapping
-    public List<Author> getAll() {
-        return authorService.getAll();
+    public List<AuthorDTO> getAll() {
+        return authorService.getAll().stream()
+                .map(AuthorMapper::toDto)
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public Author getById(@PathVariable Long id) {
-        return authorService.getById(id);
+    public AuthorDTO getById(@PathVariable Long id) {
+        return AuthorMapper.toDto(authorService.getById(id));
     }
 
     @PostMapping
-    public Author create(@RequestBody Author author) {
-        return authorService.save(author);
+    public AuthorDTO create(@RequestBody AuthorDTO dto) {
+        List<Book> books = bookService.getAllByIds(dto.getBookIds());
+        return AuthorMapper.toDto(authorService.save(
+                AuthorMapper.toEntity(dto, books)
+        ));
     }
 
     @PutMapping("/{id}")
-    public Author update(@PathVariable Long id, @RequestBody Author author) {
-        return authorService.update(id, author);
+    public AuthorDTO update(@PathVariable Long id, @RequestBody AuthorDTO dto) {
+        List<Book> books = bookService.getAllByIds(dto.getBookIds());
+        return AuthorMapper.toDto(authorService.update(
+                id,
+                AuthorMapper.toEntity(dto, books)
+        ));
     }
 
     @DeleteMapping("/{id}")
