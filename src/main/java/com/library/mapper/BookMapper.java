@@ -1,17 +1,25 @@
 package com.library.mapper;
+import com.library.model.Author;
 import com.library.model.Book;
 import com.library.model.BookDTO;
-import org.springframework.stereotype.Component;
-@Component
+
+import java.util.stream.Collectors;
+
 public class BookMapper {
-    private BookMapper() {
-    }
+
+    private BookMapper() {}
+
     public static BookDTO toDto(Book book) {
-        BookDTO dto = new BookDTO();
-        dto.setId(book.getId());
-        dto.setTitle(book.getTitle());
-        dto.setAuthor(book.getAuthor());
-        dto.setPublicationYear(book.getPublicationYear());
-        return dto;
+        return BookDTO.builder()
+                .id(book.getId())
+                .title(book.getTitle())
+                .publicationYear(book.getPublicationYear())
+                .author(
+                        book.getAuthors() == null ? "" :
+                                book.getAuthors().stream()
+                                        .map(Author::getName)
+                                        .collect(Collectors.joining(", "))
+                )
+                .build();
     }
 }

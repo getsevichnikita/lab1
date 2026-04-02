@@ -1,10 +1,11 @@
 package com.library.service;
+
 import com.library.model.Book;
 import com.library.repository.BookRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+
 @Service
 public class BookService {
 
@@ -14,12 +15,29 @@ public class BookService {
         this.repository = repository;
     }
 
-    public Optional<Book> getBookById(Long id) {
-        return repository.findById(id);
+    public Book getBookById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Book not found"));
     }
 
-    public List<Book> getBooksFiltered(String author, String title, Integer year) {
-        return repository.getBooksFiltered(author, title, year);
+    public List<Book> getAllBooks() {
+        return repository.findAll();
+    }
+
+    public Book createBook(Book book) {
+        return repository.save(book);
+    }
+
+    public Book updateBook(Long id, Book newBook) {
+        Book book = getBookById(id);
+        book.setTitle(newBook.getTitle());
+        book.setPublicationYear(newBook.getPublicationYear());
+        book.setAuthors(newBook.getAuthors());
+        return repository.save(book);
+    }
+
+    public void deleteBook(Long  id) {
+        repository.deleteById(id);
     }
 }
 
