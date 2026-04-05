@@ -7,7 +7,7 @@ import com.library.model.ReaderDTO;
 import java.util.List;
 
 public class ReaderMapper {
-
+    private ReaderMapper() {}
     public static ReaderDTO toDto(Reader reader) {
         if (reader == null) return null;
 
