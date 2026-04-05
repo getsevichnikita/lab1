@@ -27,12 +27,12 @@ public class LoanController {
 
     @PostMapping
     public LoanDTO create(@RequestBody LoanDTO dto) {
-        return loanService.create(loan);
+        return loanService.create(dto);
     }
 
     @PutMapping("/{id}")
-    public LoanDTO update(@PathVariable Long id, @RequestBody Loan loan) {
-        return loanService.update(id, loan);
+    public LoanDTO update(@PathVariable Long id, @RequestBody LoanDTO dto) {
+        return loanService.update(id, dto);
     }
 
     @DeleteMapping("/{id}")

@@ -32,12 +32,12 @@ public class BookController {
 
     @PostMapping
     public BookDTO createBook(@RequestBody BookDTO dto) {
-        return BookMapper.toDto(service.createBook(book));
+        return BookMapper.toDto(service.createBook(dto));
     }
 
     @PutMapping("/{id}")
-    public BookDTO updateBook(@PathVariable Long id, @RequestBody Book book) {
-        return BookMapper.toDto(service.updateBook(id, book));
+    public BookDTO updateBook(@PathVariable Long id, @RequestBody BookDTO dto) {
+        return BookMapper.toDto(service.updateBook(id, dto));
     }
 
     @DeleteMapping("/{id}")
