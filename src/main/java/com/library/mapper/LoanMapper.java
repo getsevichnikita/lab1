@@ -1,7 +1,9 @@
 package com.library.mapper;
 
+import com.library.model.Book;
 import com.library.model.LoanDTO;
 import com.library.model.Loan;
+import com.library.model.Reader;
 
 public class LoanMapper {
 
@@ -15,5 +17,16 @@ public class LoanMapper {
                 loan.getIssueDate(),
                 loan.getReturnDate()
         );
+    }
+    public static Loan toEntity(LoanDTO dto, Reader reader, Book book) {
+        if (dto == null) return null;
+        Loan loan = new Loan();
+        loan.setId(dto.getId());
+        loan.setReader(reader);
+        loan.setBook(book);
+        loan.setIssueDate(dto.getIssueDate());
+        loan.setReturnDate(dto.getReturnDate());
+
+        return loan;
     }
 }

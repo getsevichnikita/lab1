@@ -22,4 +22,12 @@ public class BookMapper {
                 )
                 .build();
     }
+    public static Book toEntity(BookDTO dto) {
+        if (dto == null) return null;
+        Book book = new Book();
+        book.setId(dto.getId());
+        book.setTitle(dto.getTitle());
+        book.setPublicationYear(dto.getPublicationYear());
+        return book;
+    }
 }

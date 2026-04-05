@@ -6,7 +6,7 @@ import com.library.model.Book;
 import java.util.List;
 
 public class AuthorMapper {
-
+    private AuthorMapper() {}
     public static AuthorDTO toDto(Author author) {
         if (author == null) return null;
 

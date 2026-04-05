@@ -7,7 +7,7 @@ import com.library.model.CategoryDTO;
 import java.util.List;
 
 public class CategoryMapper {
-
+    private CategoryMapper() {}
     public static CategoryDTO toDto(Category category) {
         if (category == null) return null;
 
