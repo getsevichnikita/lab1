@@ -4,7 +4,8 @@ import com.library.model.Author;
 import com.library.model.Book;
 import com.library.model.BookDTO;
 import java.util.List;
-
+import org.springframework.web.bind.annotation.*;
+@Component
 public class BookMapper {
 
     public BookDTO toDto(Book book) {
