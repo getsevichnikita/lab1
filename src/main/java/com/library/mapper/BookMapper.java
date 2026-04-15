@@ -1,33 +1,30 @@
 package com.library.mapper;
+import com.library.model.Category;
 import com.library.model.Author;
 import com.library.model.Book;
 import com.library.model.BookDTO;
-
-import java.util.stream.Collectors;
+import java.util.List;
 
 public class BookMapper {
 
-    private BookMapper() {}
+    public BookDTO toDto(Book book) {
+        BookDTO dto = new BookDTO();
+        dto.setId(book.getId());
+        dto.setTitle(book.getTitle());
+        dto.setPublicationYear(book.getPublicationYear());
 
-    public static BookDTO toDto(Book book) {
-        return BookDTO.builder()
-                .id(book.getId())
-                .title(book.getTitle())
-                .publicationYear(book.getPublicationYear())
-                .author(
-                        book.getAuthors() == null ? "" :
-                                book.getAuthors().stream()
-                                        .map(Author::getName)
-                                        .collect(Collectors.joining(", "))
-                )
-                .build();
-    }
-    public static Book toEntity(BookDTO dto) {
-        if (dto == null) return null;
-        Book book = new Book();
-        book.setId(dto.getId());
-        book.setTitle(dto.getTitle());
-        book.setPublicationYear(dto.getPublicationYear());
-        return book;
+        dto.setAuthorIds(
+                book.getAuthors() == null
+                        ? List.of()
+                        : book.getAuthors().stream().map(Author::getId).toList()
+        );
+
+        dto.setCategoryIds(
+                book.getCategories() == null
+                        ? List.of()
+                        : book.getCategories().stream().map(Category::getId).toList()
+        );
+
+        return dto;
     }
 }

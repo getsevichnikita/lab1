@@ -1,43 +1,80 @@
 package com.library.service;
 
+import com.library.mapper.BookMapper;
+import com.library.model.Author;
 import com.library.model.Book;
+import com.library.model.BookDTO;
+import com.library.model.Category;
 import com.library.repository.BookRepository;
+import com.library.repository.AuthorRepository;
+import com.library.repository.CategoryRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class BookService {
 
-    private final BookRepository repository;
+    private final BookRepository bookRepository;
+    private final AuthorRepository authorRepository;
+    private final CategoryRepository categoryRepository;
+    private final BookMapper bookMapper;
 
-    public BookService(BookRepository repository) {
-        this.repository = repository;
+    public BookDTO create(BookDTO dto) {
+
+        Book book = new Book();
+        book.setTitle(dto.getTitle());
+        book.setPublicationYear(dto.getPublicationYear());
+
+        List<Author> authors = dto.getAuthorIds() == null
+                ? List.of()
+                : authorRepository.findAllById(dto.getAuthorIds());
+
+        List<Category> categories = dto.getCategoryIds() == null
+                ? List.of()
+                : categoryRepository.findAllById(dto.getCategoryIds());
+
+        book.setAuthors(authors);
+        book.setCategories(categories);
+
+        return bookMapper.toDto(bookRepository.save(book));
     }
 
-    public Book getBookById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Book not found"));
+    public List<BookDTO> getAll() {
+        return bookRepository.findAll()
+                .stream()
+                .map(bookMapper::toDto)
+                .toList();
     }
 
-    public List<Book> getAllBooks() {
-        return repository.findAll();
+    public BookDTO getById(Long id) {
+        return bookMapper.toDto(
+                bookRepository.findById(id).orElseThrow()
+        );
     }
 
-    public Book createBook(Book book) {
-        return repository.save(book);
+    public BookDTO update(Long id, BookDTO dto) {
+
+        Book book = bookRepository.findById(id)
+                .orElseThrow();
+
+        book.setTitle(dto.getTitle());
+        book.setPublicationYear(dto.getPublicationYear());
+
+        if (dto.getAuthorIds() != null) {
+            book.setAuthors(authorRepository.findAllById(dto.getAuthorIds()));
+        }
+
+        if (dto.getCategoryIds() != null) {
+            book.setCategories(categoryRepository.findAllById(dto.getCategoryIds()));
+        }
+
+        return bookMapper.toDto(bookRepository.save(book));
     }
 
-    public Book updateBook(Long id, Book newBook) {
-        Book book = getBookById(id);
-        book.setTitle(newBook.getTitle());
-        book.setPublicationYear(newBook.getPublicationYear());
-        book.setAuthors(newBook.getAuthors());
-        return repository.save(book);
-    }
-
-    public void deleteBook(Long  id) {
-        repository.deleteById(id);
+    public void delete(Long id) {
+        bookRepository.deleteById(id);
     }
 }
-

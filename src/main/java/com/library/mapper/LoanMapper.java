@@ -10,16 +10,28 @@ public class LoanMapper {
     private LoanMapper() {}
 
     public static LoanDTO toDto(Loan loan) {
-        return new LoanDTO(
-                loan.getId(),
-                loan.getReader().getName(),
-                loan.getBook().getTitle(),
-                loan.getIssueDate(),
-                loan.getReturnDate()
+        if (loan == null) return null;
+
+        LoanDTO dto = new LoanDTO();
+        dto.setId(loan.getId());
+
+        dto.setReaderId(
+                loan.getReader() != null ? loan.getReader().getId() : null
         );
+
+        dto.setBookId(
+                loan.getBook() != null ? loan.getBook().getId() : null
+        );
+
+        dto.setIssueDate(loan.getIssueDate());
+        dto.setReturnDate(loan.getReturnDate());
+
+        return dto;
     }
+
     public static Loan toEntity(LoanDTO dto, Reader reader, Book book) {
         if (dto == null) return null;
+
         Loan loan = new Loan();
         loan.setId(dto.getId());
         loan.setReader(reader);

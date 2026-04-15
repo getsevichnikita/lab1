@@ -1,6 +1,4 @@
 package com.library.service;
-
-import com.library.exception.BookNotFoundException;
 import com.library.model.Book;
 import com.library.model.Loan;
 import com.library.model.LoanDTO;
@@ -9,7 +7,6 @@ import com.library.model.Reader;
 import com.library.repository.BookRepository;
 import com.library.repository.LoanRepository;
 import com.library.repository.ReaderRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,36 +18,48 @@ public class LoanService {
 
     private final LoanRepository loanRepository;
     private final ReaderRepository readerRepository;
-    private final BookRepository repository;
+    private final BookRepository bookRepository;
+
+    public List<LoanDTO> getAll() {
+        return loanRepository.findAll().stream()
+                .map(LoanMapper::toDto)
+                .toList();
+    }
+
     public LoanDTO getById(Long id) {
         return LoanMapper.toDto(
                 loanRepository.findById(id).orElseThrow()
         );
     }
 
-    public LoanDTO create(Loan loan) {
-        return LoanMapper.toDto(
-                loanRepository.save(loan)
-        );
+    public LoanDTO create(LoanDTO dto) {
+
+        Reader reader = readerRepository.findById(dto.getReaderId()).orElseThrow();
+        Book book = bookRepository.findById(dto.getBookId()).orElseThrow();
+
+        Loan loan = LoanMapper.toEntity(dto, reader, book);
+
+        return LoanMapper.toDto(loanRepository.save(loan));
     }
 
-    public LoanDTO update(Long id, Loan updated) {
+    public LoanDTO update(Long id, LoanDTO dto) {
+
         Loan loan = loanRepository.findById(id).orElseThrow();
 
-        loan.setReader(updated.getReader());
-        loan.setBook(updated.getBook());
-        loan.setIssueDate(updated.getIssueDate());
-        loan.setReturnDate(updated.getReturnDate());
+        Reader reader = readerRepository.findById(dto.getReaderId()).orElseThrow();
+        Book book = bookRepository.findById(dto.getBookId()).orElseThrow();
 
-        return LoanMapper.toDto(
-                loanRepository.save(loan)
-        );
+        loan.setReader(reader);
+        loan.setBook(book);
+        loan.setIssueDate(dto.getIssueDate());
+        loan.setReturnDate(dto.getReturnDate());
+
+        return LoanMapper.toDto(loanRepository.save(loan));
     }
 
     public void delete(Long id) {
         loanRepository.deleteById(id);
     }
-
     public List<LoanDTO> getAllNPlusOne() {
         return loanRepository.findAll().stream()
                 .map(LoanMapper::toDto)
@@ -62,43 +71,11 @@ public class LoanService {
                 .map(LoanMapper::toDto)
                 .toList();
     }
+
     public List<LoanDTO> getAllEntityGraph() {
         return loanRepository.findAllWithEntityGraph().stream()
                 .map(LoanMapper::toDto)
                 .toList();
-    }
-    private void createLoanInternal(String readerName) {
-
-        Reader reader = new Reader();
-        reader.setName(readerName);
-        reader = readerRepository.save(reader);
-
-        Book book = repository.findById(1L)
-                .orElseThrow(() -> new BookNotFoundException(1L));
-
-        Loan loan = new Loan();
-        loan.setReader(reader);
-        loan.setBook(book);
-        loanRepository.save(loan);
-    }
-
-    public void createLoanWithoutTransaction() {
-
-        createLoanInternal("Test Reader");
-
-        if (true) {
-            throw new RuntimeException("Ошибка после сохранения!");
-        }
-    }
-
-    @Transactional
-    public void createLoanWithTransaction() {
-
-        createLoanInternal("Transactional Reader");
-
-        if (true) {
-            throw new RuntimeException("Ошибка внутри транзакции!");
-        }
     }
 }
 

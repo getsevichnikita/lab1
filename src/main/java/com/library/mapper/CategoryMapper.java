@@ -4,10 +4,12 @@ import com.library.model.Book;
 import com.library.model.Category;
 import com.library.model.CategoryDTO;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CategoryMapper {
     private CategoryMapper() {}
+
     public static CategoryDTO toDto(Category category) {
         if (category == null) return null;
 
@@ -16,7 +18,9 @@ public class CategoryMapper {
         dto.setName(category.getName());
 
         dto.setBookIds(
-                category.getBooks()
+                category.getBooks() == null
+                        ? List.of()
+                        : category.getBooks()
                         .stream()
                         .map(Book::getId)
                         .toList()
@@ -31,7 +35,8 @@ public class CategoryMapper {
         Category category = new Category();
         category.setId(dto.getId());
         category.setName(dto.getName());
-        category.setBooks(books);
+
+        category.setBooks(books != null ? books : new ArrayList<>());
 
         return category;
     }

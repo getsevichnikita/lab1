@@ -11,8 +11,8 @@ import java.time.LocalDate;
 public class LoanDTO {
 
     private Long id;
-    private String readerName;
-    private String bookTitle;
+    private Long readerId;
+    private Long bookId;
     private LocalDate issueDate;
     private LocalDate returnDate;
 }

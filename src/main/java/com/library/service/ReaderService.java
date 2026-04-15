@@ -1,6 +1,10 @@
 package com.library.service;
 
+import com.library.mapper.ReaderMapper;
+import com.library.model.Loan;
 import com.library.model.Reader;
+import com.library.model.ReaderDTO;
+import com.library.repository.LoanRepository;
 import com.library.repository.ReaderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,24 +16,46 @@ import java.util.List;
 public class ReaderService {
 
     private final ReaderRepository readerRepository;
+    private final LoanRepository loanRepository;
 
-    public List<Reader> getAll() {
-        return readerRepository.findAll();
+    public List<ReaderDTO> getAll() {
+        return readerRepository.findAll().stream()
+                .map(ReaderMapper::toDto)
+                .toList();
     }
 
-    public Reader getById(Long id) {
-        return readerRepository.findById(id)
-                .orElseThrow();
+    public ReaderDTO getById(Long id) {
+        return ReaderMapper.toDto(
+                readerRepository.findById(id).orElseThrow()
+        );
     }
 
-    public Reader save(Reader reader) {
-        return readerRepository.save(reader);
+    public ReaderDTO save(ReaderDTO dto) {
+
+        List<Loan> loans = dto.getLoanIds() == null
+                ? List.of()
+                : loanRepository.findAllById(dto.getLoanIds());
+
+        Reader reader = ReaderMapper.toEntity(dto, loans);
+
+        return ReaderMapper.toDto(
+                readerRepository.save(reader)
+        );
     }
 
-    public Reader update(Long id, Reader updated) {
-        Reader reader = getById(id);
-        reader.setName(updated.getName());
-        return readerRepository.save(reader);
+    public ReaderDTO update(Long id, ReaderDTO dto) {
+
+        Reader reader = readerRepository.findById(id).orElseThrow();
+
+        reader.setName(dto.getName());
+
+        if (dto.getLoanIds() != null) {
+            reader.setLoans(loanRepository.findAllById(dto.getLoanIds()));
+        }
+
+        return ReaderMapper.toDto(
+                readerRepository.save(reader)
+        );
     }
 
     public void delete(Long id) {

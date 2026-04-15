@@ -1,6 +1,4 @@
 package com.library.controller;
-
-import com.library.model.Loan;
 import com.library.model.LoanDTO;
 import com.library.service.LoanService;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +15,7 @@ public class LoanController {
 
     @GetMapping
     public List<LoanDTO> getAll() {
-        return loanService.getAllEntityGraph();
+        return loanService.getAll();
     }
 
     @GetMapping("/{id}")
@@ -38,27 +36,6 @@ public class LoanController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         loanService.delete(id);
-    }
-
-    @GetMapping("/nplus1")
-    public List<LoanDTO> nplus1() {
-        return loanService.getAllNPlusOne();
-    }
-    @GetMapping("/joinfetch")
-    public List<LoanDTO> joinFetch() {
-        return loanService.getAllJoinFetch();
-    }
-
-    @GetMapping("/no-transaction")
-    public String noTransaction() {
-        loanService.createLoanWithoutTransaction();
-        return "done";
-    }
-
-    @GetMapping("/with-transaction")
-    public String withTransaction() {
-        loanService.createLoanWithTransaction();
-        return "done";
     }
 
 }
