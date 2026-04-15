@@ -3,8 +3,6 @@ package com.library.mapper;
 import com.library.model.Book;
 import com.library.model.Category;
 import com.library.model.CategoryDTO;
-
-import java.util.ArrayList;
 import java.util.List;
 
 public class CategoryMapper {
@@ -29,15 +27,4 @@ public class CategoryMapper {
         return dto;
     }
 
-    public static Category toEntity(CategoryDTO dto, List<Book> books) {
-        if (dto == null) return null;
-
-        Category category = new Category();
-        category.setId(dto.getId());
-        category.setName(dto.getName());
-
-        category.setBooks(books != null ? books : new ArrayList<>());
-
-        return category;
-    }
 }
