@@ -5,8 +5,8 @@ import com.library.model.Author;
 import com.library.model.Book;
 import com.library.model.BookDTO;
 import com.library.model.Category;
-import com.library.repository.BookRepository;
 import com.library.repository.AuthorRepository;
+import com.library.repository.BookRepository;
 import com.library.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,6 @@ public class BookService {
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
     private final CategoryRepository categoryRepository;
-    private final BookMapper bookMapper;
 
     public BookDTO create(BookDTO dto) {
 
@@ -39,18 +38,18 @@ public class BookService {
         book.setAuthors(authors);
         book.setCategories(categories);
 
-        return bookMapper.toDto(bookRepository.save(book));
+        return BookMapper.toDto(bookRepository.save(book));
     }
 
     public List<BookDTO> getAll() {
         return bookRepository.findAll()
                 .stream()
-                .map(bookMapper::toDto)
+                .map(BookMapper::toDto)
                 .toList();
     }
 
     public BookDTO getById(Long id) {
-        return bookMapper.toDto(
+        return BookMapper.toDto(
                 bookRepository.findById(id).orElseThrow()
         );
     }
@@ -71,7 +70,7 @@ public class BookService {
             book.setCategories(categoryRepository.findAllById(dto.getCategoryIds()));
         }
 
-        return bookMapper.toDto(bookRepository.save(book));
+        return BookMapper.toDto(bookRepository.save(book));
     }
 
     public void delete(Long id) {
