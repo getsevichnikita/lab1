@@ -13,12 +13,12 @@ public class ReaderController {
 
     private final ReaderService readerService;
 
-    @PostMapping("/no-tc")
+    @PatchMapping("/no-tc")
     public void updateNoTx(@RequestBody List<Long> ids) {
         readerService.updateReadersNoTransaction(ids);
     }
 
-    @PostMapping("/tc")
+    @PatchMapping("/tc")
     public void updateTx(@RequestBody List<Long> ids) {
         readerService.updateReadersTransaction(ids);
     }
