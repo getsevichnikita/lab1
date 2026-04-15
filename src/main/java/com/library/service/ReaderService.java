@@ -6,6 +6,7 @@ import com.library.model.Reader;
 import com.library.model.ReaderDTO;
 import com.library.repository.LoanRepository;
 import com.library.repository.ReaderRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -65,5 +66,23 @@ public class ReaderService {
         return readerRepository.findAllWithLoans().stream()
                 .map(ReaderMapper::toDto)
                 .toList();
+    }
+    public void updateReadersNoTransaction(List<Long> readerIds) {
+
+        for (Long id : readerIds) {
+
+            Reader reader = readerRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Reader not found: " + id));
+
+            reader.setName(reader.getName() + " UPDATED");
+
+            readerRepository.save(reader);
+
+        }
+    }
+    @Transactional
+    public void updateReadersTransaction(List<Long> readerIds) {
+            updateReadersNoTransaction(readerIds);
+
     }
 }
