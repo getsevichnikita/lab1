@@ -13,7 +13,12 @@ public class ReaderController {
 
     private final ReaderService readerService;
 
-    @GetMapping
+    @GetMapping("/entity-graph")
+    public List<ReaderDTO> getAllEntityGraph() {
+        return readerService.getAllEntityGraph();
+    }
+
+    @GetMapping("/nplus1")
     public List<ReaderDTO> getAll() {
         return readerService.getAll();
     }
