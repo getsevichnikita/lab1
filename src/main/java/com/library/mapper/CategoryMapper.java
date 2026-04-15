@@ -4,7 +4,6 @@ import com.library.model.Book;
 import com.library.model.Category;
 import com.library.model.CategoryDTO;
 import java.util.List;
-
 public class CategoryMapper {
     private CategoryMapper() {}
 
