@@ -57,8 +57,13 @@ public class ReaderService {
                 readerRepository.save(reader)
         );
     }
-
     public void delete(Long id) {
         readerRepository.deleteById(id);
+    }
+
+    public List<ReaderDTO> getAllEntityGraph() {
+        return readerRepository.findAllWithLoans().stream()
+                .map(ReaderMapper::toDto)
+                .toList();
     }
 }
