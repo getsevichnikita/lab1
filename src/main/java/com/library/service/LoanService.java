@@ -60,22 +60,5 @@ public class LoanService {
     public void delete(Long id) {
         loanRepository.deleteById(id);
     }
-    public List<LoanDTO> getAllNPlusOne() {
-        return loanRepository.findAll().stream()
-                .map(LoanMapper::toDto)
-                .toList();
-    }
-
-    public List<LoanDTO> getAllJoinFetch() {
-        return loanRepository.findAllWithJoinFetch().stream()
-                .map(LoanMapper::toDto)
-                .toList();
-    }
-
-    public List<LoanDTO> getAllEntityGraph() {
-        return loanRepository.findAllWithEntityGraph().stream()
-                .map(LoanMapper::toDto)
-                .toList();
-    }
 }
 
