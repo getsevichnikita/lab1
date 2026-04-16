@@ -13,7 +13,7 @@ public class ReaderController {
 
     private final ReaderService readerService;
 
-    @PatchMapping("/assign/no-tx")
+    @PostMapping("/assign/no-tx")
     public void assignNoTx(@RequestBody ReaderDTO dto) {
         readerService.assignLoansNoTransaction(
                 dto.getId(),
@@ -21,7 +21,7 @@ public class ReaderController {
         );
     }
 
-    @PatchMapping("/assign/tx")
+    @PostMapping("/assign/tx")
     public void assignTx(@RequestBody ReaderDTO dto) {
         readerService.assignLoansTransaction(
                 dto.getId(),
