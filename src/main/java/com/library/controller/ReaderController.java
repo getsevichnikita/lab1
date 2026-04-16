@@ -13,14 +13,20 @@ public class ReaderController {
 
     private final ReaderService readerService;
 
-    @PatchMapping("/no-tc")
-    public void updateNoTx(@RequestBody List<Long> ids) {
-        readerService.updateReadersNoTransaction(ids);
+    @PatchMapping("/assign/no-tx")
+    public void assignNoTx(@RequestBody ReaderDTO dto) {
+        readerService.assignLoansNoTransaction(
+                dto.getId(),
+                dto.getLoanIds()
+        );
     }
 
-    @PatchMapping("/tc")
-    public void updateTx(@RequestBody List<Long> ids) {
-        readerService.updateReadersTransaction(ids);
+    @PatchMapping("/assign/tx")
+    public void assignTx(@RequestBody ReaderDTO dto) {
+        readerService.assignLoansTransaction(
+                dto.getId(),
+                dto.getLoanIds()
+        );
     }
     @GetMapping("/entity-graph")
     public List<ReaderDTO> getAllEntityGraph() {

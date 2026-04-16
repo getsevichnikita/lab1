@@ -45,15 +45,11 @@ public class ReaderService {
     }
 
     public ReaderDTO update(Long id, ReaderDTO dto) {
-
         Reader reader = readerRepository.findById(id).orElseThrow();
-
         reader.setName(dto.getName());
-
         if (dto.getLoanIds() != null) {
             reader.setLoans(loanRepository.findAllById(dto.getLoanIds()));
         }
-
         return ReaderMapper.toDto(
                 readerRepository.save(reader)
         );
@@ -67,22 +63,18 @@ public class ReaderService {
                 .map(ReaderMapper::toDto)
                 .toList();
     }
-    public void updateReadersNoTransaction(List<Long> readerIds) {
-
-        for (Long id : readerIds) {
-
-            Reader reader = readerRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Reader not found: " + id));
-
-            reader.setName(reader.getName() + " UPDATED");
-
-            readerRepository.save(reader);
-
+    public void assignLoansNoTransaction(Long readerId, List<Long> loanIds) {
+            Reader reader = readerRepository.findById(readerId)
+                    .orElseThrow(() -> new RuntimeException("Reader not found"));
+            for (Long loanId : loanIds) {
+                Loan loan = loanRepository.findById(loanId)
+                        .orElseThrow(() -> new RuntimeException("Loan not found: " + loanId));
+                loan.setReader(reader);
+                loanRepository.save(loan);
+            }
         }
-    }
     @Transactional
-    public void updateReadersTransaction(List<Long> readerIds) {
-            updateReadersNoTransaction(readerIds);
-
+    public void assignLoansTransaction(Long readerId, List<Long> loanIds) {
+        assignLoansNoTransaction(readerId, loanIds);
     }
 }
