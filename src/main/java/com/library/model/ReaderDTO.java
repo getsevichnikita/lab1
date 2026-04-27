@@ -11,6 +11,5 @@ import lombok.*;
 public class ReaderDTO {
     private Long id;
     private String name;
-
     private List<Long> loanIds;
 }

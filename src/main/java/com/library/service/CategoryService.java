@@ -69,6 +69,16 @@ public class CategoryService {
     }
 
     public void delete(Long id) {
-        categoryRepository.deleteById(id);
+            Category category = categoryRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Category not found"));
+
+            for (Book book : category.getBooks()) {
+                book.getCategories().remove(category);
+            }
+
+            category.getBooks().clear();
+
+            categoryRepository.delete(category);
+
     }
 }

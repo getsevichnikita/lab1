@@ -62,6 +62,15 @@ public class AuthorService {
         return AuthorMapper.toDto(authorRepository.save(author));
     }
     public void delete(Long id) {
-        authorRepository.deleteById(id);
+        Author author = authorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Author not found"));
+
+        for (Book book : new ArrayList<>(author.getBooks())) {
+            book.getAuthors().remove(author);
+        }
+
+        author.getBooks().clear();
+
+        authorRepository.delete(author);
     }
 }

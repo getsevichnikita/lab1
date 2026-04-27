@@ -1,5 +1,4 @@
 package com.library.service;
-
 import com.library.mapper.BookMapper;
 import com.library.model.Author;
 import com.library.model.Book;
@@ -10,9 +9,8 @@ import com.library.repository.BookRepository;
 import com.library.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
+import java.util.ArrayList;
 import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class BookService {
@@ -74,6 +72,16 @@ public class BookService {
     }
 
     public void delete(Long id) {
-        bookRepository.deleteById(id);
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Book not found"));
+        for (Author author : new ArrayList<>(book.getAuthors())) {
+            author.getBooks().remove(book);
+        }
+        book.getAuthors().clear();
+        for (Category category : new ArrayList<>(book.getCategories())) {
+            category.getBooks().remove(book);
+        }
+        book.getCategories().clear();
+        bookRepository.delete(book);
     }
 }
