@@ -12,5 +12,15 @@
 В проекте подключен checkstyle
 
 # JPA (Hibernate/Spring Data)
+Подключена БД PostgreSQL. Реализованы сущности Author, Category, Reader, Loan.
+
+ManyToMany: Author и Book, Category и Book. OneToMany: Reader и Loan.
+
+CascadeType выбран стандартный для каждой связи. FetchType только LAZY
+
+Проблема N+1 демонстрируется на методе GET поиска всех сущностей Reader в БД, решается с помощью @EntityGraph.
+
+Реализован метод PATCH изменения списка Loan для Reader, результат его работы сравнивается с аналогом с @Transactional
+
 
 SonarCloud: https://sonarcloud.io/organizations/getsevichnikita/projects
