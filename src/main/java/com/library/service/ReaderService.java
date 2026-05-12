@@ -4,6 +4,7 @@ import com.library.mapper.ReaderMapper;
 import com.library.model.Loan;
 import com.library.model.Reader;
 import com.library.model.ReaderDTO;
+import com.library.model.ReaderDTONplus1;
 import com.library.repository.LoanRepository;
 import com.library.repository.ReaderRepository;
 import jakarta.transaction.Transactional;
@@ -19,11 +20,12 @@ public class ReaderService {
     private final ReaderRepository readerRepository;
     private final LoanRepository loanRepository;
 
-    public List<ReaderDTO> getAll() {
+    public List<ReaderDTONplus1> getAll() {
         return readerRepository.findAll().stream()
-                .map(ReaderMapper::toDto)
+                .map(ReaderMapper::toDtoNplus1)
                 .toList();
     }
+
 
     public ReaderDTO getById(Long id) {
         return ReaderMapper.toDto(
@@ -58,9 +60,9 @@ public class ReaderService {
         readerRepository.deleteById(id);
     }
 
-    public List<ReaderDTO> getAllEntityGraph() {
+    public List<ReaderDTONplus1> getAllEntityGraph() {
         return readerRepository.findAllWithLoans().stream()
-                .map(ReaderMapper::toDto)
+                .map(ReaderMapper::toDtoNplus1)
                 .toList();
     }
     public void assignLoansNoTransaction(Long readerId, List<Long> loanIds) {

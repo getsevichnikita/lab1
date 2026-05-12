@@ -3,6 +3,7 @@ package com.library.mapper;
 import com.library.model.Loan;
 import com.library.model.Reader;
 import com.library.model.ReaderDTO;
+import com.library.model.ReaderDTONplus1;
 
 import java.util.List;
 
@@ -32,6 +33,33 @@ public class ReaderMapper {
         reader.setId(dto.getId());
         reader.setName(dto.getName());
         reader.setLoans(loans);
+
+        return reader;
+    }
+    public static ReaderDTONplus1 toDtoNplus1(Reader reader) {
+        return ReaderDTONplus1.builder()
+                .id(reader.getId())
+                .name(reader.getName())
+                .loans(
+                        reader.getLoans().stream()
+                                .map(LoanMapper::toDto)
+                                .toList()
+                )
+                .build();
+    }
+
+    public static Reader toEntityNplus1(ReaderDTONplus1 dto) {
+        Reader reader = new Reader();
+        reader.setId(dto.getId());
+        reader.setName(dto.getName());
+
+        if (dto.getLoans() != null) {
+            reader.setLoans(
+                    dto.getLoans().stream()
+                            .map(LoanMapper::toEntityNplus1)
+                            .toList()
+            );
+        }
 
         return reader;
     }

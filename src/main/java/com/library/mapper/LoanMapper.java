@@ -40,5 +40,20 @@ public class LoanMapper {
         loan.setReturnDate(dto.getReturnDate());
 
         return loan;
+    }public static Loan toEntityNplus1(LoanDTO dto) {
+        if (dto == null) return null;
+        Loan loan = new Loan();
+        loan.setId(dto.getId());
+        Reader reader = new Reader();
+        reader.setId(dto.getReaderId());
+        loan.setReader(reader);
+        Book book = new Book();
+        book.setId(dto.getBookId());
+        loan.setBook(book);
+        loan.setIssueDate(dto.getIssueDate());
+        loan.setReturnDate(dto.getReturnDate());
+
+        return loan;
     }
+
 }

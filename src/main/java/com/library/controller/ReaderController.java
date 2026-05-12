@@ -1,5 +1,6 @@
 package com.library.controller;
 import com.library.model.ReaderDTO;
+import com.library.model.ReaderDTONplus1;
 import com.library.service.ReaderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -29,12 +30,12 @@ public class ReaderController {
         );
     }
     @GetMapping("/entity-graph")
-    public List<ReaderDTO> getAllEntityGraph() {
+    public List<ReaderDTONplus1> getAllEntityGraph() {
         return readerService.getAllEntityGraph();
     }
 
     @GetMapping("/nplus1")
-    public List<ReaderDTO> getAll() {
+    public List<ReaderDTONplus1> getAll() {
         return readerService.getAll();
     }
 
