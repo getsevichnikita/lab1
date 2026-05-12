@@ -8,6 +8,8 @@ import com.library.repository.AuthorRepository;
 import com.library.repository.BookRepository;
 import com.library.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
@@ -83,5 +85,23 @@ public class BookService {
         }
         book.getCategories().clear();
         bookRepository.delete(book);
+    }
+
+    public Page<BookDTO> searchByAuthorJPQL(
+            String author,
+            Pageable pageable
+    ) {
+        return bookRepository
+                .findByAuthorNameJPQL(author, pageable)
+                .map(BookMapper::toDto);
+    }
+
+    public Page<BookDTO> searchByAuthorNative(
+            String author,
+            Pageable pageable
+    ) {
+        return bookRepository
+                .findByAuthorNameNative(author, pageable)
+                .map(BookMapper::toDto);
     }
 }

@@ -22,4 +22,8 @@ CascadeType выбран стандартный для каждой связи. 
 
 Реализован метод PATCH изменения списка Loan для Reader, результат его работы сравнивается с аналогом с @Transactional
 
+# Data Caching
+
+
+
 SonarCloud: https://sonarcloud.io/organizations/getsevichnikita/projects
