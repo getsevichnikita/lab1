@@ -8,6 +8,7 @@ import com.library.repository.BookRepository;
 import com.library.repository.LoanRepository;
 import com.library.repository.ReaderRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,8 +21,9 @@ public class LoanService {
     private final ReaderRepository readerRepository;
     private final BookRepository bookRepository;
 
-    public List<LoanDTO> getAll() {
-        return loanRepository.findAll().stream()
+    public List<LoanDTO> getAll(Pageable pageable) {
+        return loanRepository.findAll(pageable)
+                .stream()
                 .map(LoanMapper::toDto)
                 .toList();
     }

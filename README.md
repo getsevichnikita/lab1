@@ -18,12 +18,17 @@ ManyToMany: Author и Book, Category и Book. OneToMany: Reader и Loan.
 
 CascadeType выбран стандартный для каждой связи. FetchType только LAZY
 
-Проблема N+1 демонстрируется на методе GET поиска всех сущностей Reader в БД, решается с помощью @EntityGraph.
+Проблема N+1 демонстрируется на методе GET поиска всех сущностей Reader в БД (endpoint: .../nplus1 в ReaderController), решается с помощью @EntityGraph (.../entity-graph).
 
-Реализован метод PATCH изменения списка Loan для Reader, результат его работы сравнивается с аналогом с @Transactional
+Реализован метод PATCH изменения списка Loan для Reader, результат его работы сравнивается с аналогом с @Transactional (.../assign/no-tx и .../assign/tx).
 
 # Data Caching
+Сложный GET-запрос с использованием JPQL и аналогичный native query выполняет поиск книг по имени автора через связь ManyToMany между сущностями Book и Author (BookController: .../search/jpql и .../search/native).
 
+Добавлена пагинация для описанного выше метода и для метода, извлекающих из БД все данные (getAll функции).
 
+Составной ключ для in-memory индекса на HashMap реализован в классе BookSearchKey
+
+Инвалидация индекса происходит путём очистки кэша
 
 SonarCloud: https://sonarcloud.io/organizations/getsevichnikita/projects

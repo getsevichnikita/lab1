@@ -2,6 +2,7 @@ package com.library.controller;
 import com.library.model.AuthorDTO;
 import com.library.service.AuthorService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,8 +15,8 @@ public class AuthorController {
     private final AuthorService authorService;
 
     @GetMapping
-    public List<AuthorDTO> getAll() {
-        return authorService.getAll();
+    public List<AuthorDTO> getAll(Pageable pageable) {
+        return authorService.getAll(pageable);
     }
 
     @GetMapping("/{id}")

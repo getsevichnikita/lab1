@@ -3,6 +3,7 @@ import com.library.model.ReaderDTO;
 import com.library.model.ReaderDTONplus1;
 import com.library.service.ReaderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,13 +31,13 @@ public class ReaderController {
         );
     }
     @GetMapping("/entity-graph")
-    public List<ReaderDTONplus1> getAllEntityGraph() {
-        return readerService.getAllEntityGraph();
+    public List<ReaderDTONplus1> getAllEntityGraph(Pageable pageable) {
+        return readerService.getAllEntityGraph(pageable);
     }
 
     @GetMapping("/nplus1")
-    public List<ReaderDTONplus1> getAll() {
-        return readerService.getAll();
+    public List<ReaderDTONplus1> getAll(Pageable pageable) {
+        return readerService.getAll(pageable);
     }
 
     @GetMapping("/{id}")

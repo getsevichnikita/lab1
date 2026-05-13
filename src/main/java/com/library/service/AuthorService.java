@@ -7,6 +7,7 @@ import com.library.model.Book;
 import com.library.repository.AuthorRepository;
 import com.library.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,8 +20,9 @@ public class AuthorService {
     private final AuthorRepository authorRepository;
     private final BookRepository bookRepository;
 
-    public List<AuthorDTO> getAll() {
-        return authorRepository.findAll().stream()
+    public List<AuthorDTO> getAll(Pageable pageable) {
+        return authorRepository.findAll(pageable)
+                .stream()
                 .map(AuthorMapper::toDto)
                 .toList();
     }

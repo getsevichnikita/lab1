@@ -7,6 +7,7 @@ import com.library.model.CategoryDTO;
 import com.library.repository.BookRepository;
 import com.library.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,8 +20,9 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final BookRepository bookRepository;
 
-    public List<CategoryDTO> getAll() {
-        return categoryRepository.findAll().stream()
+    public List<CategoryDTO> getAll(Pageable pageable) {
+        return categoryRepository.findAll(pageable)
+                .stream()
                 .map(CategoryMapper::toDto)
                 .toList();
     }

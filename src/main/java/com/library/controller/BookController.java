@@ -2,7 +2,6 @@ package com.library.controller;
 import com.library.model.BookDTO;
 import com.library.service.BookService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,31 +16,36 @@ public class BookController {
     public BookDTO create(@RequestBody BookDTO dto) {
         return bookService.create(dto);
     }
+
     @GetMapping
-    public List<BookDTO> getAll() {
-        return bookService.getAll();
+    public List<BookDTO> getAll(Pageable pageable) {
+        return bookService.getAll(pageable);
     }
     @GetMapping("/{id}")
     public BookDTO getById(@PathVariable Long id) {
         return bookService.getById(id);
     }
+
     @PutMapping("/{id}")
     public BookDTO update(@PathVariable Long id, @RequestBody BookDTO dto) {
         return bookService.update(id, dto);
     }
+
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         bookService.delete(id);
     }
+
     @GetMapping("/search/jpql")
-    public Page<BookDTO> searchByAuthorJPQL(
+    public List<BookDTO> searchByAuthorJPQL(
             @RequestParam String author,
             Pageable pageable
     ) {
         return bookService.searchByAuthorJPQL(author, pageable);
     }
+
     @GetMapping("/search/native")
-    public Page<BookDTO> searchByAuthorNative(
+    public List<BookDTO> searchByAuthorNative(
             @RequestParam String author,
             Pageable pageable
     ) {

@@ -1,4 +1,6 @@
 package com.library.service;
+import com.library.cache.BookSearchKey;
+import lombok.extern.slf4j.Slf4j;
 import com.library.mapper.BookMapper;
 import com.library.model.Author;
 import com.library.model.Book;
@@ -8,11 +10,12 @@ import com.library.repository.AuthorRepository;
 import com.library.repository.BookRepository;
 import com.library.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BookService {
@@ -20,6 +23,7 @@ public class BookService {
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
     private final CategoryRepository categoryRepository;
+    private final HashMap<BookSearchKey, List<BookDTO>> cache = new HashMap<>();
 
     public BookDTO create(BookDTO dto) {
 
@@ -38,11 +42,15 @@ public class BookService {
         book.setAuthors(authors);
         book.setCategories(categories);
 
-        return BookMapper.toDto(bookRepository.save(book));
+        Book savedBook = bookRepository.save(book);
+
+        invalidateCache();
+
+        return BookMapper.toDto(savedBook);
     }
 
-    public List<BookDTO> getAll() {
-        return bookRepository.findAll()
+    public List<BookDTO> getAll(Pageable pageable) {
+        return bookRepository.findAll(pageable)
                 .stream()
                 .map(BookMapper::toDto)
                 .toList();
@@ -70,7 +78,11 @@ public class BookService {
             book.setCategories(categoryRepository.findAllById(dto.getCategoryIds()));
         }
 
-        return BookMapper.toDto(bookRepository.save(book));
+        Book updatedBook = bookRepository.save(book);
+
+        invalidateCache();
+
+        return BookMapper.toDto(updatedBook);
     }
 
     public void delete(Long id) {
@@ -85,23 +97,62 @@ public class BookService {
         }
         book.getCategories().clear();
         bookRepository.delete(book);
+        invalidateCache();
     }
 
-    public Page<BookDTO> searchByAuthorJPQL(
+    public List<BookDTO> searchByAuthorJPQL(
             String author,
             Pageable pageable
     ) {
-        return bookRepository
+
+        BookSearchKey key = new BookSearchKey(
+                author,
+                pageable.getPageNumber(),
+                pageable.getPageSize()
+        );
+
+        if (cache.containsKey(key)) {
+            return cache.get(key);
+        }
+        List<BookDTO> result = bookRepository
                 .findByAuthorNameJPQL(author, pageable)
-                .map(BookMapper::toDto);
+                .stream()
+                .map(BookMapper::toDto)
+                .toList();
+
+        cache.put(key, result);
+
+        return result;
     }
 
-    public Page<BookDTO> searchByAuthorNative(
+    public List<BookDTO> searchByAuthorNative(
             String author,
             Pageable pageable
     ) {
-        return bookRepository
+
+        BookSearchKey key = new BookSearchKey(
+                author,
+                pageable.getPageNumber(),
+                pageable.getPageSize()
+        );
+
+        if (cache.containsKey(key)) {
+            log.info("FROM CACHE");
+            return cache.get(key);
+        }
+
+        List<BookDTO> result = bookRepository
                 .findByAuthorNameNative(author, pageable)
-                .map(BookMapper::toDto);
+                .stream()
+                .map(BookMapper::toDto)
+                .toList();
+
+        cache.put(key, result);
+        log.info("FROM DATABASE");
+        return result;
+    }
+
+    private void invalidateCache() {
+        cache.clear();
     }
 }

@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 @Service
@@ -20,8 +21,9 @@ public class ReaderService {
     private final ReaderRepository readerRepository;
     private final LoanRepository loanRepository;
 
-    public List<ReaderDTONplus1> getAll() {
-        return readerRepository.findAll().stream()
+    public List<ReaderDTONplus1> getAll(Pageable pageable) {
+        return readerRepository.findAll(pageable)
+                .stream()
                 .map(ReaderMapper::toDtoNplus1)
                 .toList();
     }
@@ -60,8 +62,9 @@ public class ReaderService {
         readerRepository.deleteById(id);
     }
 
-    public List<ReaderDTONplus1> getAllEntityGraph() {
-        return readerRepository.findAllWithLoans().stream()
+    public List<ReaderDTONplus1> getAllEntityGraph(Pageable pageable) {
+        return readerRepository.findAllWithLoans(pageable)
+                .stream()
                 .map(ReaderMapper::toDtoNplus1)
                 .toList();
     }

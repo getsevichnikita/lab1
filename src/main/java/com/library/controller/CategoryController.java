@@ -2,6 +2,7 @@ package com.library.controller;
 import com.library.model.CategoryDTO;
 import com.library.service.CategoryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,8 +15,8 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @GetMapping
-    public List<CategoryDTO> getAll() {
-        return categoryService.getAll();
+    public List<CategoryDTO> getAll(Pageable pageable) {
+        return categoryService.getAll(pageable);
     }
 
     @GetMapping("/{id}")

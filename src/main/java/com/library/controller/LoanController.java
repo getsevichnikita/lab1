@@ -2,6 +2,7 @@ package com.library.controller;
 import com.library.model.LoanDTO;
 import com.library.service.LoanService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,8 +15,8 @@ public class LoanController {
     private final LoanService loanService;
 
     @GetMapping
-    public List<LoanDTO> getAll() {
-        return loanService.getAll();
+    public List<LoanDTO> getAll(Pageable pageable) {
+        return loanService.getAll(pageable);
     }
 
     @GetMapping("/{id}")
