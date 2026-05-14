@@ -1,5 +1,6 @@
 package com.library.service;
 import com.library.cache.BookSearchKey;
+import com.library.model.BookDTOFields;
 import lombok.extern.slf4j.Slf4j;
 import com.library.mapper.BookMapper;
 import com.library.model.Author;
@@ -23,7 +24,7 @@ public class BookService {
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
     private final CategoryRepository categoryRepository;
-    private final HashMap<BookSearchKey, List<BookDTO>> cache = new HashMap<>();
+    private final HashMap<BookSearchKey, List<BookDTOFields>> cache = new HashMap<>();
 
     public BookDTO create(BookDTO dto) {
 
@@ -100,11 +101,10 @@ public class BookService {
         invalidateCache();
     }
 
-    public List<BookDTO> searchByAuthorJPQL(
+    public List<BookDTOFields> searchByAuthorJPQL(
             String author,
             Pageable pageable
     ) {
-
         BookSearchKey key = new BookSearchKey(
                 author,
                 pageable.getPageNumber(),
@@ -114,22 +114,22 @@ public class BookService {
         if (cache.containsKey(key)) {
             return cache.get(key);
         }
-        List<BookDTO> result = bookRepository
+
+        List<BookDTOFields> result = bookRepository
                 .findByAuthorNameJPQL(author, pageable)
                 .stream()
-                .map(BookMapper::toDto)
+                .map(BookMapper::toDtoFields)
                 .toList();
 
         cache.put(key, result);
-
         return result;
     }
 
-    public List<BookDTO> searchByAuthorNative(
+
+    public List<BookDTOFields> searchByAuthorNative(
             String author,
             Pageable pageable
     ) {
-
         BookSearchKey key = new BookSearchKey(
                 author,
                 pageable.getPageNumber(),
@@ -141,16 +141,17 @@ public class BookService {
             return cache.get(key);
         }
 
-        List<BookDTO> result = bookRepository
+        List<BookDTOFields> result = bookRepository
                 .findByAuthorNameNative(author, pageable)
                 .stream()
-                .map(BookMapper::toDto)
+                .map(BookMapper::toDtoFields)
                 .toList();
 
         cache.put(key, result);
         log.info("FROM DATABASE");
         return result;
     }
+
 
     private void invalidateCache() {
         cache.clear();

@@ -1,5 +1,6 @@
 package com.library.controller;
 import com.library.model.BookDTO;
+import com.library.model.BookDTOFields;
 import com.library.service.BookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -37,7 +38,7 @@ public class BookController {
     }
 
     @GetMapping("/search/jpql")
-    public List<BookDTO> searchByAuthorJPQL(
+    public List<BookDTOFields> searchByAuthorJPQL(
             @RequestParam String author,
             Pageable pageable
     ) {
@@ -45,10 +46,11 @@ public class BookController {
     }
 
     @GetMapping("/search/native")
-    public List<BookDTO> searchByAuthorNative(
+    public List<BookDTOFields> searchByAuthorNative(
             @RequestParam String author,
             Pageable pageable
     ) {
         return bookService.searchByAuthorNative(author, pageable);
     }
+
 }
