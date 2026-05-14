@@ -14,6 +14,6 @@ public class BookDTOFields {
     private String title;
     private int publicationYear;
 
-    private List<AuthorDTO> authors;
-    private List<CategoryDTO> categories;
+    private List<AuthorDTO4BDTOF> authors;
+    private List<CategoryDTO4BDTOF> categories;
 }

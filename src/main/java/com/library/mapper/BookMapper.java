@@ -1,11 +1,13 @@
 package com.library.mapper;
-
+import com.library.model.AuthorDTO4BDTOF;
+import com.library.model.CategoryDTO4BDTOF;
+import com.library.model.CategoryDTO;
+import com.library.model.AuthorDTO;
 import com.library.model.Author;
 import com.library.model.Book;
 import com.library.model.BookDTO;
 import com.library.model.BookDTOFields;
 import com.library.model.Category;
-
 import java.util.List;
 
 public class BookMapper {
@@ -47,12 +49,12 @@ public class BookMapper {
                 .publicationYear(book.getPublicationYear())
                 .authors(
                         book.getAuthors().stream()
-                                .map(a -> new AuthorDTO(a.getId(), a.getName()))
+                                .map(a -> new AuthorDTO4BDTOF(a.getId(), a.getName()))
                                 .toList()
                 )
                 .categories(
                         book.getCategories().stream()
-                                .map(c -> new CategoryDTO(c.getId(), c.getName()))
+                                .map(c -> new CategoryDTO4BDTOF(c.getId(), c.getName()))
                                 .toList()
                 )
                 .build();
