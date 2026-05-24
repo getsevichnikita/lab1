@@ -1,6 +1,7 @@
 package com.library.controller;
 import com.library.model.CategoryDTO;
 import com.library.service.CategoryService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
@@ -25,12 +26,12 @@ public class CategoryController {
     }
 
     @PostMapping
-    public CategoryDTO create(@RequestBody CategoryDTO dto) {
+    public CategoryDTO create(@Valid @RequestBody CategoryDTO dto) {
         return categoryService.save(dto);
     }
 
     @PutMapping("/{id}")
-    public CategoryDTO update(@PathVariable Long id, @RequestBody CategoryDTO dto) {
+    public CategoryDTO update(@Valid @PathVariable Long id, @RequestBody CategoryDTO dto) {
         return categoryService.update(id, dto);
     }
 

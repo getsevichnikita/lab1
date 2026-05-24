@@ -1,4 +1,5 @@
 package com.library.service;
+import com.library.exception.InvalidLoanDatesException;
 import com.library.model.Book;
 import com.library.model.Loan;
 import com.library.model.LoanDTO;
@@ -35,7 +36,11 @@ public class LoanService {
     }
 
     public LoanDTO create(LoanDTO dto) {
-
+        if (dto.getReturnDate().isBefore(dto.getIssueDate())) {
+            throw new InvalidLoanDatesException(
+                    "Return date cannot be before issue date"
+            );
+        }
         Reader reader = readerRepository.findById(dto.getReaderId()).orElseThrow();
         Book book = bookRepository.findById(dto.getBookId()).orElseThrow();
 
@@ -45,7 +50,11 @@ public class LoanService {
     }
 
     public LoanDTO update(Long id, LoanDTO dto) {
-
+        if (dto.getReturnDate().isBefore(dto.getIssueDate())) {
+            throw new InvalidLoanDatesException(
+                    "Return date cannot be before issue date"
+            );
+        }
         Loan loan = loanRepository.findById(id).orElseThrow();
 
         Reader reader = readerRepository.findById(dto.getReaderId()).orElseThrow();

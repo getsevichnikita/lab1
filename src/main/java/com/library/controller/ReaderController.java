@@ -2,6 +2,7 @@ package com.library.controller;
 import com.library.model.ReaderDTO;
 import com.library.model.ReaderDTONplus1;
 import com.library.service.ReaderService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +17,7 @@ public class ReaderController {
     private final ReaderService readerService;
 
     @PatchMapping("/assign/no-tx")
-    public void assignNoTx(@RequestBody ReaderDTO dto) {
+    public void assignNoTx(@Valid @RequestBody ReaderDTO dto) {
         readerService.assignLoansNoTransaction(
                 dto.getId(),
                 dto.getLoanIds()
@@ -24,7 +25,7 @@ public class ReaderController {
     }
 
     @PatchMapping("/assign/tx")
-    public void assignTx(@RequestBody ReaderDTO dto) {
+    public void assignTx(@Valid @RequestBody ReaderDTO dto) {
         readerService.assignLoansTransaction(
                 dto.getId(),
                 dto.getLoanIds()
@@ -46,12 +47,12 @@ public class ReaderController {
     }
 
     @PostMapping
-    public ReaderDTO create(@RequestBody ReaderDTO dto) {
+    public ReaderDTO create(@Valid @RequestBody ReaderDTO dto) {
         return readerService.save(dto);
     }
 
     @PutMapping("/{id}")
-    public ReaderDTO update(@PathVariable Long id, @RequestBody ReaderDTO dto) {
+    public ReaderDTO update(@Valid @PathVariable Long id, @RequestBody ReaderDTO dto) {
         return readerService.update(id, dto);
     }
 

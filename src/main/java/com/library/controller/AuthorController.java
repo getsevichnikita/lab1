@@ -1,6 +1,7 @@
 package com.library.controller;
 import com.library.model.AuthorDTO;
 import com.library.service.AuthorService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
@@ -25,12 +26,12 @@ public class AuthorController {
     }
 
     @PostMapping
-    public AuthorDTO create(@RequestBody AuthorDTO dto) {
+    public AuthorDTO create(@Valid @RequestBody AuthorDTO dto) {
         return authorService.save(dto);
     }
 
     @PutMapping("/{id}")
-    public AuthorDTO update(@PathVariable Long id, @RequestBody AuthorDTO dto) {
+    public AuthorDTO update(@PathVariable Long id, @Valid @RequestBody AuthorDTO dto) {
         return authorService.update(id, dto);
     }
 

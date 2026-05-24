@@ -1,8 +1,4 @@
 package com.library.mapper;
-import com.library.model.AuthorDTO4BDTOF;
-import com.library.model.CategoryDTO4BDTOF;
-import com.library.model.CategoryDTO;
-import com.library.model.AuthorDTO;
 import com.library.model.Author;
 import com.library.model.Book;
 import com.library.model.BookDTO;
@@ -49,12 +45,12 @@ public class BookMapper {
                 .publicationYear(book.getPublicationYear())
                 .authors(
                         book.getAuthors().stream()
-                                .map(a -> new AuthorDTO4BDTOF(a.getId(), a.getName()))
+                                .map(AuthorMapper::toDto4bdtof)
                                 .toList()
                 )
                 .categories(
                         book.getCategories().stream()
-                                .map(c -> new CategoryDTO4BDTOF(c.getId(), c.getName()))
+                                .map(CategoryMapper::toDto4bdtof)
                                 .toList()
                 )
                 .build();
@@ -68,23 +64,13 @@ public class BookMapper {
 
         book.setAuthors(
                 dto.getAuthors().stream()
-                        .map(a -> {
-                            Author author = new Author();
-                            author.setId(a.getId());
-                            author.setName(a.getName());
-                            return author;
-                        })
+                        .map(AuthorMapper::toEntity4bdtof)
                         .toList()
         );
 
         book.setCategories(
                 dto.getCategories().stream()
-                        .map(c -> {
-                            Category category = new Category();
-                            category.setId(c.getId());
-                            category.setName(c.getName());
-                            return category;
-                        })
+                        .map(CategoryMapper::toEntity4bdtof)
                         .toList()
         );
 

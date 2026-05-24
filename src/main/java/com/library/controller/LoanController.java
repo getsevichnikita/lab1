@@ -1,6 +1,7 @@
 package com.library.controller;
 import com.library.model.LoanDTO;
 import com.library.service.LoanService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
@@ -25,12 +26,12 @@ public class LoanController {
     }
 
     @PostMapping
-    public LoanDTO create(@RequestBody LoanDTO dto) {
+    public LoanDTO create(@Valid @RequestBody LoanDTO dto) {
         return loanService.create(dto);
     }
 
     @PutMapping("/{id}")
-    public LoanDTO update(@PathVariable Long id, @RequestBody LoanDTO dto) {
+    public LoanDTO update(@Valid @PathVariable Long id, @RequestBody LoanDTO dto) {
         return loanService.update(id, dto);
     }
 

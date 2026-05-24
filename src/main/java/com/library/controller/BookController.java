@@ -2,6 +2,7 @@ package com.library.controller;
 import com.library.model.BookDTO;
 import com.library.model.BookDTOFields;
 import com.library.service.BookService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +15,7 @@ import java.util.List;
 public class BookController {
     private final BookService bookService;
     @PostMapping
-    public BookDTO create(@RequestBody BookDTO dto) {
+    public BookDTO create(@Valid @RequestBody BookDTO dto) {
         return bookService.create(dto);
     }
 
@@ -28,7 +29,7 @@ public class BookController {
     }
 
     @PutMapping("/{id}")
-    public BookDTO update(@PathVariable Long id, @RequestBody BookDTO dto) {
+    public BookDTO update(@PathVariable Long id, @Valid @RequestBody BookDTO dto) {
         return bookService.update(id, dto);
     }
 
