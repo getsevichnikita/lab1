@@ -1,6 +1,8 @@
 package com.library.service;
 
+import com.library.exception.ResourceNotFoundException;
 import com.library.mapper.AuthorMapper;
+import lombok.extern.slf4j.Slf4j;
 import com.library.model.Author;
 import com.library.model.AuthorDTO;
 import com.library.model.Book;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthorService {
@@ -28,8 +31,11 @@ public class AuthorService {
     }
 
     public AuthorDTO getById(Long id) {
-        return AuthorMapper.toDto(
-                authorRepository.findById(id).orElseThrow()
+        return AuthorMapper.toDto(authorRepository.findById(id).orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Book not found with id = " + id
+                        )
+                )
         );
     }
 
@@ -44,11 +50,16 @@ public class AuthorService {
             author.getBooks().add(book);
             book.getAuthors().add(author);
         }
+        log.info("Creating author with id={}", dto.getId());
         return AuthorMapper.toDto(authorRepository.save(author));
     }
 
     public AuthorDTO update(Long id, AuthorDTO dto) {
-        Author author = authorRepository.findById(id).orElseThrow();
+        Author author = authorRepository.findById(id).orElseThrow(() ->
+                new ResourceNotFoundException(
+                        "Author not found with id = " + id
+                )
+        );
         author.setName(dto.getName());
         for (Book book : author.getBooks()) {
             book.getAuthors().remove(author);
@@ -61,18 +72,23 @@ public class AuthorService {
                 book.getAuthors().add(author);
             }
         }
+        log.info("Updating author with id={}", dto.getId());
         return AuthorMapper.toDto(authorRepository.save(author));
     }
     public void delete(Long id) {
         Author author = authorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Author not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Author not found with id = " + id
+                        )
+                );
 
         for (Book book : new ArrayList<>(author.getBooks())) {
             book.getAuthors().remove(author);
         }
 
         author.getBooks().clear();
-
+        log.info("Deleting author with id={}", id);
         authorRepository.delete(author);
     }
 }

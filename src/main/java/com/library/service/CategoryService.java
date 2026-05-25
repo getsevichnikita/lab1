@@ -1,5 +1,6 @@
 package com.library.service;
 
+import com.library.exception.ResourceNotFoundException;
 import com.library.mapper.CategoryMapper;
 import com.library.model.Book;
 import com.library.model.Category;
@@ -12,7 +13,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import lombok.extern.slf4j.Slf4j;
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CategoryService {
@@ -29,7 +31,11 @@ public class CategoryService {
 
     public CategoryDTO getById(Long id) {
         return CategoryMapper.toDto(
-                categoryRepository.findById(id).orElseThrow()
+                categoryRepository.findById(id) .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Category not found with id = " + id
+                        )
+                )
         );
     }
 
@@ -44,11 +50,16 @@ public class CategoryService {
             category.getBooks().add(book);
             book.getCategories().add(category);
         }
+        log.info("Category created with id={}", dto.getId());
         return CategoryMapper.toDto(categoryRepository.save(category));
     }
 
     public CategoryDTO update(Long id, CategoryDTO dto) {
-        Category category = categoryRepository.findById(id).orElseThrow();
+        Category category = categoryRepository.findById(id) .orElseThrow(() ->
+                new ResourceNotFoundException(
+                        "Category not found with id = " + id
+                )
+        );
         category.setName(dto.getName());
         for (Book book : category.getBooks()) {
             book.getCategories().remove(category);
@@ -64,23 +75,26 @@ public class CategoryService {
                 book.getCategories().add(category);
             }
         }
-
+        log.info("Category updated with id={}", dto.getId());
         return CategoryMapper.toDto(
                 categoryRepository.save(category)
         );
     }
 
     public void delete(Long id) {
-            Category category = categoryRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Category not found"));
-
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Category not found with id = " + id
+                        )
+                );
             for (Book book : category.getBooks()) {
                 book.getCategories().remove(category);
             }
 
-            category.getBooks().clear();
-
-            categoryRepository.delete(category);
+        category.getBooks().clear();
+        log.info("Category deleted with id={}", id);
+        categoryRepository.delete(category);
 
     }
 }

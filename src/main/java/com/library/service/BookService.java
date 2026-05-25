@@ -1,5 +1,6 @@
 package com.library.service;
 import com.library.cache.BookSearchKey;
+import com.library.exception.ResourceNotFoundException;
 import com.library.model.BookDTOFields;
 import lombok.extern.slf4j.Slf4j;
 import com.library.mapper.BookMapper;
@@ -27,7 +28,6 @@ public class BookService {
     private final HashMap<BookSearchKey, List<BookDTOFields>> cache = new HashMap<>();
 
     public BookDTO create(BookDTO dto) {
-
         Book book = new Book();
         book.setTitle(dto.getTitle());
         book.setPublicationYear(dto.getPublicationYear());
@@ -46,7 +46,7 @@ public class BookService {
         Book savedBook = bookRepository.save(book);
 
         invalidateCache();
-
+        log.info("Book created with id={}", dto.getId());
         return BookMapper.toDto(savedBook);
     }
 
@@ -59,14 +59,21 @@ public class BookService {
 
     public BookDTO getById(Long id) {
         return BookMapper.toDto(
-                bookRepository.findById(id).orElseThrow()
+                bookRepository.findById(id) .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Book not found with id = " + id
+                        )
+                )
         );
     }
 
     public BookDTO update(Long id, BookDTO dto) {
-
         Book book = bookRepository.findById(id)
-                .orElseThrow();
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Book not found with id = " + id
+                        )
+                );
 
         book.setTitle(dto.getTitle());
         book.setPublicationYear(dto.getPublicationYear());
@@ -82,13 +89,17 @@ public class BookService {
         Book updatedBook = bookRepository.save(book);
 
         invalidateCache();
-
+        log.info("Updating book with id={}", id);
         return BookMapper.toDto(updatedBook);
     }
 
     public void delete(Long id) {
         Book book = bookRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Book not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Book not found with id = " + id
+                        )
+                );
         for (Author author : new ArrayList<>(book.getAuthors())) {
             author.getBooks().remove(book);
         }
@@ -97,6 +108,7 @@ public class BookService {
             category.getBooks().remove(book);
         }
         book.getCategories().clear();
+        log.info("Deleting book with id={}", id);
         bookRepository.delete(book);
         invalidateCache();
     }
@@ -112,6 +124,7 @@ public class BookService {
         );
 
         if (cache.containsKey(key)) {
+            log.debug(" (JPQL) Books found in cache for author={}", author);
             return cache.get(key);
         }
 
@@ -122,6 +135,7 @@ public class BookService {
                 .toList();
 
         cache.put(key, result);
+        log.debug(" (JPQL) Books loaded from database for author={}", author);
         return result;
     }
 
@@ -137,7 +151,7 @@ public class BookService {
         );
 
         if (cache.containsKey(key)) {
-            log.info("FROM CACHE");
+            log.debug(" (NQ) Books found in cache for author={}", author);
             return cache.get(key);
         }
 
@@ -148,7 +162,7 @@ public class BookService {
                 .toList();
 
         cache.put(key, result);
-        log.info("FROM DATABASE");
+        log.debug(" (NQ) Books loaded from database for author={}", author);
         return result;
     }
 

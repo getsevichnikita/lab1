@@ -1,5 +1,6 @@
 package com.library.service;
 import com.library.exception.InvalidLoanDatesException;
+import com.library.exception.ResourceNotFoundException;
 import com.library.model.Book;
 import com.library.model.Loan;
 import com.library.model.LoanDTO;
@@ -13,7 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-
+import lombok.extern.slf4j.Slf4j;
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LoanService {
@@ -31,11 +33,16 @@ public class LoanService {
 
     public LoanDTO getById(Long id) {
         return LoanMapper.toDto(
-                loanRepository.findById(id).orElseThrow()
+                loanRepository.findById(id) .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Loan not found with id = " + id
+                        )
+                )
         );
     }
 
     public LoanDTO create(LoanDTO dto) {
+
         if (dto.getReturnDate().isBefore(dto.getIssueDate())) {
             throw new InvalidLoanDatesException(
                     "Return date cannot be before issue date"
@@ -45,7 +52,7 @@ public class LoanService {
         Book book = bookRepository.findById(dto.getBookId()).orElseThrow();
 
         Loan loan = LoanMapper.toEntity(dto, reader, book);
-
+        log.info("Loan created with id={}", dto.getId());
         return LoanMapper.toDto(loanRepository.save(loan));
     }
 
@@ -55,21 +62,42 @@ public class LoanService {
                     "Return date cannot be before issue date"
             );
         }
-        Loan loan = loanRepository.findById(id).orElseThrow();
+        Loan loan = loanRepository.findById(id) .orElseThrow(() ->
+                new ResourceNotFoundException(
+                        "Loan not found with id = " + id
+                )
+        );
 
-        Reader reader = readerRepository.findById(dto.getReaderId()).orElseThrow();
-        Book book = bookRepository.findById(dto.getBookId()).orElseThrow();
+        Reader reader = readerRepository.findById(dto.getReaderId()).orElseThrow(() ->
+                new ResourceNotFoundException(
+                        "Reader not found with id = " + id
+                )
+        );
+        Book book = bookRepository.findById(dto.getBookId()).orElseThrow(() ->
+                new ResourceNotFoundException(
+                        "Book not found with id = " + id
+                )
+        );
 
         loan.setReader(reader);
         loan.setBook(book);
         loan.setIssueDate(dto.getIssueDate());
         loan.setReturnDate(dto.getReturnDate());
-
+        log.info("Loan updated with id={}", dto.getId());
         return LoanMapper.toDto(loanRepository.save(loan));
     }
 
     public void delete(Long id) {
-        loanRepository.deleteById(id);
+        Loan loan = loanRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Loan not found with id = " + id
+                        )
+                );
+
+        loanRepository.delete(loan);
+
+        log.info("Loan deleted with id={}", id);
     }
 }
 

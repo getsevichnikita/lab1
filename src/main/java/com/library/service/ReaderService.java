@@ -1,5 +1,7 @@
 package com.library.service;
 
+import com.library.exception.ResourceNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import com.library.mapper.ReaderMapper;
 import com.library.model.Loan;
 import com.library.model.Reader;
@@ -12,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
 import java.util.List;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReaderService {
@@ -30,35 +32,53 @@ public class ReaderService {
 
     public ReaderDTO getById(Long id) {
         return ReaderMapper.toDto(
-                readerRepository.findById(id).orElseThrow()
+                readerRepository.findById(id).orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Reader not found with id = " + id
+                        )
+                )
         );
     }
 
     public ReaderDTO save(ReaderDTO dto) {
-
         List<Loan> loans = dto.getLoanIds() == null
                 ? List.of()
                 : loanRepository.findAllById(dto.getLoanIds());
 
         Reader reader = ReaderMapper.toEntity(dto, loans);
-
+        log.info("Reader created with id={}", dto.getId());
         return ReaderMapper.toDto(
                 readerRepository.save(reader)
         );
     }
 
     public ReaderDTO update(Long id, ReaderDTO dto) {
-        Reader reader = readerRepository.findById(id).orElseThrow();
+        Reader reader = readerRepository.findById(id).orElseThrow(() ->
+                new ResourceNotFoundException(
+                        "Reader not found with id = " + id
+                )
+        );
         reader.setName(dto.getName());
         if (dto.getLoanIds() != null) {
             reader.setLoans(loanRepository.findAllById(dto.getLoanIds()));
         }
+        log.info("Reader updated with id={}", dto.getId());
         return ReaderMapper.toDto(
                 readerRepository.save(reader)
         );
     }
     public void delete(Long id) {
-        readerRepository.deleteById(id);
+
+        Reader reader = readerRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Reader not found with id = " + id
+                        )
+                );
+
+        readerRepository.delete(reader);
+
+        log.info("Reader deleted with id={}", id);
     }
 
     public List<ReaderDTONplus1> getAllEntityGraph(Pageable pageable) {
@@ -69,11 +89,18 @@ public class ReaderService {
     }
     public void assignLoansNoTransaction(Long readerId, List<Long> loanIds) {
             Reader reader = readerRepository.findById(readerId)
-                    .orElseThrow(() -> new RuntimeException("Reader not found"));
+                    .orElseThrow(() ->
+                            new ResourceNotFoundException(
+                                    "Reader not found with id = " + readerId
+                            )
+                    );
             for (Long loanId : loanIds) {
                 Loan loan = loanRepository.findById(loanId)
-                        .orElseThrow(() -> new RuntimeException("Loan not found: " + loanId));
-                loan.setReader(reader);
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Loan not found with id = " + loanId
+                                )
+                        );                loan.setReader(reader);
                 loanRepository.save(loan);
             }
         }
