@@ -1,5 +1,6 @@
 package com.library.service;
 import com.library.cache.BookSearchKey;
+import com.library.cache.HashMapBSK;
 import com.library.exception.ResourceNotFoundException;
 import com.library.model.BookDTOFields;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 @Slf4j
 @Service
@@ -25,7 +25,7 @@ public class BookService {
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
     private final CategoryRepository categoryRepository;
-    private final HashMap<BookSearchKey, List<BookDTOFields>> cache = new HashMap<>();
+    private final HashMapBSK<BookSearchKey, List<BookDTOFields>> cache = new HashMapBSK<>();
 
     public BookDTO create(BookDTO dto) {
         Book book = new Book();
@@ -124,7 +124,6 @@ public class BookService {
         );
 
         if (cache.containsKey(key)) {
-            log.debug(" (JPQL) Books found in cache for author={}", author);
             return cache.get(key);
         }
 
@@ -135,7 +134,6 @@ public class BookService {
                 .toList();
 
         cache.put(key, result);
-        log.debug(" (JPQL) Books loaded from database for author={}", author);
         return result;
     }
 
@@ -151,7 +149,6 @@ public class BookService {
         );
 
         if (cache.containsKey(key)) {
-            log.debug(" (NQ) Books found in cache for author={}", author);
             return cache.get(key);
         }
 
@@ -162,7 +159,6 @@ public class BookService {
                 .toList();
 
         cache.put(key, result);
-        log.debug(" (NQ) Books loaded from database for author={}", author);
         return result;
     }
 
