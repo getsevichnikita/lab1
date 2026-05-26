@@ -3,6 +3,7 @@ package com.library.mapper;
 import com.library.model.Book;
 import com.library.model.LoanDTO;
 import com.library.model.Loan;
+import com.library.model.LoanDTOFields;
 import com.library.model.Reader;
 
 public class LoanMapper {
@@ -40,20 +41,32 @@ public class LoanMapper {
         loan.setReturnDate(dto.getReturnDate());
 
         return loan;
-    }public static Loan toEntityNplus1(LoanDTO dto) {
-        if (dto == null) return null;
-        Loan loan = new Loan();
-        loan.setId(dto.getId());
-        Reader reader = new Reader();
-        reader.setId(dto.getReaderId());
-        loan.setReader(reader);
-        Book book = new Book();
-        book.setId(dto.getBookId());
-        loan.setBook(book);
-        loan.setIssueDate(dto.getIssueDate());
-        loan.setReturnDate(dto.getReturnDate());
-
-        return loan;
     }
 
+    public static LoanDTOFields toDtoFields(Loan loan) {
+        if (loan == null) {
+            return null;
+        }
+
+        LoanDTOFields dto = new LoanDTOFields();
+
+        dto.setId(loan.getId());
+
+        dto.setReaderId(
+                loan.getReader() != null
+                        ? loan.getReader().getId()
+                        : null
+        );
+
+        dto.setBook(
+                loan.getBook() != null
+                        ? BookMapper.toDtoFields(loan.getBook())
+                        : null
+        );
+
+        dto.setIssueDate(loan.getIssueDate());
+        dto.setReturnDate(loan.getReturnDate());
+
+        return dto;
+    }
 }

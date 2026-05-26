@@ -42,25 +42,10 @@ public class ReaderMapper {
                 .name(reader.getName())
                 .loans(
                         reader.getLoans().stream()
-                                .map(LoanMapper::toDto)
+                                .map(LoanMapper::toDtoFields)
                                 .toList()
                 )
                 .build();
     }
 
-    public static Reader toEntityNplus1(ReaderDTONplus1 dto) {
-        Reader reader = new Reader();
-        reader.setId(dto.getId());
-        reader.setName(dto.getName());
-
-        if (dto.getLoans() != null) {
-            reader.setLoans(
-                    dto.getLoans().stream()
-                            .map(LoanMapper::toEntityNplus1)
-                            .toList()
-            );
-        }
-
-        return reader;
-    }
 }

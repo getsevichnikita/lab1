@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class CategoryService {
-
+    private static final String LOG_CATEGORY_NOT_FOUND = "Category not found with id = ";
     private final CategoryRepository categoryRepository;
     private final BookRepository bookRepository;
 
@@ -33,7 +33,7 @@ public class CategoryService {
         return CategoryMapper.toDto(
                 categoryRepository.findById(id) .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "Category not found with id = " + id
+                                LOG_CATEGORY_NOT_FOUND + id
                         )
                 )
         );
@@ -57,7 +57,7 @@ public class CategoryService {
     public CategoryDTO update(Long id, CategoryDTO dto) {
         Category category = categoryRepository.findById(id) .orElseThrow(() ->
                 new ResourceNotFoundException(
-                        "Category not found with id = " + id
+                        LOG_CATEGORY_NOT_FOUND + id
                 )
         );
         category.setName(dto.getName());
@@ -85,7 +85,7 @@ public class CategoryService {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "Category not found with id = " + id
+                                LOG_CATEGORY_NOT_FOUND + id
                         )
                 );
             for (Book book : category.getBooks()) {

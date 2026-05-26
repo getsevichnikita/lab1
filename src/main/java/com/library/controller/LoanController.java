@@ -86,5 +86,43 @@ public class LoanController {
         loanService.delete(id);
     }
 
+    @Operation(summary = "Bulk create loans without transaction")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Loans created successfully"),
+            @ApiResponse(responseCode = "400", description = "Validation error",
+                    content = @Content(
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )),
+            @ApiResponse(responseCode = "404", description = "Book or reader not found",
+                    content = @Content(
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    ))
+    })
+    @PostMapping("/bulk/no-tx")
+    public List<LoanDTO> createBulkNoTx(
+            @Valid @RequestBody List<LoanDTO> dtos
+    ) {
+        return loanService.createBulkNoTransaction(dtos);
+    }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Loans created successfully"),
+            @ApiResponse(responseCode = "400", description = "Validation error",
+                    content = @Content(
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )),
+            @ApiResponse(responseCode = "404", description = "Book or reader not found",
+                    content = @Content(
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    ))
+    })
+    @Operation(summary = "Bulk create loans with transaction")
+    @PostMapping("/bulk/tx")
+    public List<LoanDTO> createBulkTx(
+            @Valid @RequestBody List<LoanDTO> dtos
+    ) {
+        return loanService.createBulkTransaction(dtos);
+    }
+
 }
 

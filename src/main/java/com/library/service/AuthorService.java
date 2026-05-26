@@ -19,7 +19,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class AuthorService {
-
+    private static final String LOG_AUTHOR_NOT_FOUND = "Author not found with id = ";
     private final AuthorRepository authorRepository;
     private final BookRepository bookRepository;
 
@@ -33,7 +33,7 @@ public class AuthorService {
     public AuthorDTO getById(Long id) {
         return AuthorMapper.toDto(authorRepository.findById(id).orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "Book not found with id = " + id
+                                LOG_AUTHOR_NOT_FOUND + id
                         )
                 )
         );
@@ -57,7 +57,7 @@ public class AuthorService {
     public AuthorDTO update(Long id, AuthorDTO dto) {
         Author author = authorRepository.findById(id).orElseThrow(() ->
                 new ResourceNotFoundException(
-                        "Author not found with id = " + id
+                        LOG_AUTHOR_NOT_FOUND + id
                 )
         );
         author.setName(dto.getName());
@@ -79,7 +79,7 @@ public class AuthorService {
         Author author = authorRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "Author not found with id = " + id
+                                LOG_AUTHOR_NOT_FOUND + id
                         )
                 );
 

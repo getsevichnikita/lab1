@@ -18,7 +18,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ReaderService {
-
+    private static final String LOG_READER_NOT_FOUND = "Reader not found with id = ";
     private final ReaderRepository readerRepository;
     private final LoanRepository loanRepository;
 
@@ -34,7 +34,7 @@ public class ReaderService {
         return ReaderMapper.toDto(
                 readerRepository.findById(id).orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "Reader not found with id = " + id
+                                LOG_READER_NOT_FOUND + id
                         )
                 )
         );
@@ -55,7 +55,7 @@ public class ReaderService {
     public ReaderDTO update(Long id, ReaderDTO dto) {
         Reader reader = readerRepository.findById(id).orElseThrow(() ->
                 new ResourceNotFoundException(
-                        "Reader not found with id = " + id
+                        LOG_READER_NOT_FOUND + id
                 )
         );
         reader.setName(dto.getName());
@@ -72,7 +72,7 @@ public class ReaderService {
         Reader reader = readerRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "Reader not found with id = " + id
+                                LOG_READER_NOT_FOUND + id
                         )
                 );
 
@@ -91,7 +91,7 @@ public class ReaderService {
             Reader reader = readerRepository.findById(readerId)
                     .orElseThrow(() ->
                             new ResourceNotFoundException(
-                                    "Reader not found with id = " + readerId
+                                    LOG_READER_NOT_FOUND + readerId
                             )
                     );
             for (Long loanId : loanIds) {

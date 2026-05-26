@@ -16,5 +16,5 @@ public class ReaderDTONplus1 {
     @Schema(description = "Reader name", example = "1")
     private String name;
     @Schema(description = "List of loans")
-    private List<LoanDTO> loans;
+    private List<LoanDTOFields> loans;
 }

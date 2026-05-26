@@ -12,14 +12,15 @@ import com.library.repository.ReaderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
+import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class LoanService {
-
+    private static final String LOG_LOAN_NOT_FOUND = "Loan not found with id = " ;
     private final LoanRepository loanRepository;
     private final ReaderRepository readerRepository;
     private final BookRepository bookRepository;
@@ -35,7 +36,7 @@ public class LoanService {
         return LoanMapper.toDto(
                 loanRepository.findById(id) .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "Loan not found with id = " + id
+                                LOG_LOAN_NOT_FOUND + id
                         )
                 )
         );
@@ -48,8 +49,16 @@ public class LoanService {
                     "Return date cannot be before issue date"
             );
         }
-        Reader reader = readerRepository.findById(dto.getReaderId()).orElseThrow();
-        Book book = bookRepository.findById(dto.getBookId()).orElseThrow();
+        Reader reader = readerRepository.findById(dto.getReaderId()).orElseThrow(() ->
+                new ResourceNotFoundException(
+                        "Reader not found with id = " + dto.getReaderId()
+                )
+        );
+        Book book = bookRepository.findById(dto.getBookId()).orElseThrow(() ->
+                new ResourceNotFoundException(
+                        "Book not found with id = " + dto.getBookId()
+                )
+        );
 
         Loan loan = LoanMapper.toEntity(dto, reader, book);
         log.info("Loan created with id={}", dto.getId());
@@ -64,7 +73,7 @@ public class LoanService {
         }
         Loan loan = loanRepository.findById(id) .orElseThrow(() ->
                 new ResourceNotFoundException(
-                        "Loan not found with id = " + id
+                        LOG_LOAN_NOT_FOUND + id
                 )
         );
 
@@ -91,7 +100,7 @@ public class LoanService {
         Loan loan = loanRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "Loan not found with id = " + id
+                                LOG_LOAN_NOT_FOUND + id
                         )
                 );
 
@@ -99,5 +108,17 @@ public class LoanService {
 
         log.info("Loan deleted with id={}", id);
     }
+    public List<LoanDTO> createBulkNoTransaction(List<LoanDTO> dtos) {
+        return dtos.stream()
+                .map(this::create)
+                .toList();
+    }
+
+    @Transactional
+    public List<LoanDTO> createBulkTransaction(List<LoanDTO> dtos) {
+        return createBulkNoTransaction(dtos);
+    }
 }
+
+
 

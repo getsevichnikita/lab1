@@ -1,4 +1,5 @@
 package com.library.service;
+
 import com.library.cache.BookSearchKey;
 import com.library.cache.HashMapBSK;
 import com.library.exception.ResourceNotFoundException;
@@ -21,7 +22,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class BookService {
-
+    private static final String LOG_BOOK_NOT_FOUND = "Book not found with id = ";
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
     private final CategoryRepository categoryRepository;
@@ -61,7 +62,7 @@ public class BookService {
         return BookMapper.toDto(
                 bookRepository.findById(id) .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "Book not found with id = " + id
+                                LOG_BOOK_NOT_FOUND + id
                         )
                 )
         );
@@ -71,7 +72,7 @@ public class BookService {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "Book not found with id = " + id
+                                LOG_BOOK_NOT_FOUND + id
                         )
                 );
 
@@ -97,7 +98,7 @@ public class BookService {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "Book not found with id = " + id
+                                LOG_BOOK_NOT_FOUND + id
                         )
                 );
         for (Author author : new ArrayList<>(book.getAuthors())) {
@@ -123,8 +124,10 @@ public class BookService {
                 pageable.getPageSize()
         );
 
-        if (cache.containsKey(key)) {
-            return cache.get(key);
+        List<BookDTOFields> cached = cache.get(key);
+
+        if (cached != null) {
+            return cached;
         }
 
         List<BookDTOFields> result = bookRepository
@@ -148,8 +151,10 @@ public class BookService {
                 pageable.getPageSize()
         );
 
-        if (cache.containsKey(key)) {
-            return cache.get(key);
+        List<BookDTOFields> cached = cache.get(key);
+
+        if (cached != null) {
+            return cached;
         }
 
         List<BookDTOFields> result = bookRepository
@@ -161,7 +166,6 @@ public class BookService {
         cache.put(key, result);
         return result;
     }
-
 
     private void invalidateCache() {
         cache.clear();
