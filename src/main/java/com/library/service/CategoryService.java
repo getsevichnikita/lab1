@@ -2,9 +2,9 @@ package com.library.service;
 
 import com.library.exception.ResourceNotFoundException;
 import com.library.mapper.CategoryMapper;
-import com.library.model.Book;
-import com.library.model.Category;
-import com.library.model.CategoryDTO;
+import com.library.model.entity.Book;
+import com.library.model.entity.Category;
+import com.library.model.dto.CategoryDTO;
 import com.library.repository.BookRepository;
 import com.library.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;

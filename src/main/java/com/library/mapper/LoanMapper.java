@@ -1,10 +1,10 @@
 package com.library.mapper;
 
-import com.library.model.Book;
-import com.library.model.LoanDTO;
-import com.library.model.Loan;
-import com.library.model.LoanDTOFields;
-import com.library.model.Reader;
+import com.library.model.entity.Book;
+import com.library.model.dto.LoanDTO;
+import com.library.model.entity.Loan;
+import com.library.model.dto.LoanDTOFields;
+import com.library.model.entity.Reader;
 
 public class LoanMapper {
 

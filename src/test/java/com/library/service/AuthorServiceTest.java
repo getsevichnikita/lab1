@@ -1,9 +1,9 @@
 package com.library.service;
 
 import com.library.exception.ResourceNotFoundException;
-import com.library.model.Author;
-import com.library.model.AuthorDTO;
-import com.library.model.Book;
+import com.library.model.entity.Author;
+import com.library.model.dto.AuthorDTO;
+import com.library.model.entity.Book;
 import com.library.repository.AuthorRepository;
 import com.library.repository.BookRepository;
 import org.junit.jupiter.api.Test;

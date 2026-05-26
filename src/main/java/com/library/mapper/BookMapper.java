@@ -1,9 +1,9 @@
 package com.library.mapper;
-import com.library.model.Author;
-import com.library.model.Book;
-import com.library.model.BookDTO;
-import com.library.model.BookDTOFields;
-import com.library.model.Category;
+import com.library.model.entity.Author;
+import com.library.model.entity.Book;
+import com.library.model.dto.BookDTO;
+import com.library.model.dto.BookDTOFields;
+import com.library.model.entity.Category;
 import java.util.List;
 
 public class BookMapper {

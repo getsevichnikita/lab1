@@ -1,7 +1,7 @@
 package com.library.controller;
 import com.library.exception.ErrorResponse;
-import com.library.model.BookDTO;
-import com.library.model.BookDTOFields;
+import com.library.model.dto.BookDTO;
+import com.library.model.dto.BookDTOFields;
 import com.library.service.BookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

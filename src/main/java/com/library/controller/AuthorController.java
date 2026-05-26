@@ -1,6 +1,6 @@
 package com.library.controller;
 import com.library.exception.ErrorResponse;
-import com.library.model.AuthorDTO;
+import com.library.model.dto.AuthorDTO;
 import com.library.service.AuthorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

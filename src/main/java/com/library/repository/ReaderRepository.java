@@ -1,6 +1,6 @@
 package com.library.repository;
 
-import com.library.model.Reader;
+import com.library.model.entity.Reader;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

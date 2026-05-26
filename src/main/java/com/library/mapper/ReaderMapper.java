@@ -1,9 +1,9 @@
 package com.library.mapper;
 
-import com.library.model.Loan;
-import com.library.model.Reader;
-import com.library.model.ReaderDTO;
-import com.library.model.ReaderDTONplus1;
+import com.library.model.entity.Loan;
+import com.library.model.entity.Reader;
+import com.library.model.dto.ReaderDTO;
+import com.library.model.dto.ReaderDTONplus1;
 
 import java.util.List;
 

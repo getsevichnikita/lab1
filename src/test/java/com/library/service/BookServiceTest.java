@@ -1,11 +1,11 @@
 package com.library.service;
 
 import com.library.exception.ResourceNotFoundException;
-import com.library.model.Author;
-import com.library.model.Book;
-import com.library.model.BookDTO;
-import com.library.model.BookDTOFields;
-import com.library.model.Category;
+import com.library.model.entity.Author;
+import com.library.model.entity.Book;
+import com.library.model.dto.BookDTO;
+import com.library.model.dto.BookDTOFields;
+import com.library.model.entity.Category;
 import com.library.repository.AuthorRepository;
 import com.library.repository.BookRepository;
 import com.library.repository.CategoryRepository;

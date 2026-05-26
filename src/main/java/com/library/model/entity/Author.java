@@ -1,20 +1,16 @@
-package com.library.model;
-import lombok.*;
+package com.library.model.entity;
 import jakarta.persistence.*;
+import lombok.*;
 import java.util.*;
-
-@Entity
 @Getter
 @Setter
 @NoArgsConstructor
-
-public class Category {
+@Entity
+public class Author {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String name;
-
-    @ManyToMany(mappedBy = "categories")
+    @ManyToMany(mappedBy = "authors")
     private List<Book> books = new ArrayList<>();
 }

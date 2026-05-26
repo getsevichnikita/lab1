@@ -2,10 +2,10 @@ package com.library.service;
 
 import com.library.exception.InvalidLoanDatesException;
 import com.library.exception.ResourceNotFoundException;
-import com.library.model.Book;
-import com.library.model.Loan;
-import com.library.model.LoanDTO;
-import com.library.model.Reader;
+import com.library.model.entity.Book;
+import com.library.model.entity.Loan;
+import com.library.model.dto.LoanDTO;
+import com.library.model.entity.Reader;
 import com.library.repository.BookRepository;
 import com.library.repository.LoanRepository;
 import com.library.repository.ReaderRepository;
@@ -31,6 +31,9 @@ class LoanServiceTest {
 
     @Mock
     private ReaderRepository readerRepository;
+
+    @Mock
+    private TaskService taskService;
 
     @Mock
     private BookRepository bookRepository;
@@ -420,5 +423,96 @@ class LoanServiceTest {
         assertEquals(1, result.size());
 
         verify(loanRepository).save(any(Loan.class));
+    }
+
+    @Test
+    void createBulkAsync_shouldMarkTaskDone() {
+
+        Reader reader = new Reader();
+        reader.setId(1L);
+
+        Book book = new Book();
+        book.setId(1L);
+
+        Loan loan = new Loan();
+        loan.setId(1L);
+
+        LoanDTO dto = new LoanDTO();
+        dto.setReaderId(1L);
+        dto.setBookId(1L);
+        dto.setIssueDate(LocalDate.now());
+        dto.setReturnDate(LocalDate.now().plusDays(7));
+
+        when(readerRepository.findById(1L))
+                .thenReturn(Optional.of(reader));
+
+        when(bookRepository.findById(1L))
+                .thenReturn(Optional.of(book));
+
+        when(loanRepository.save(any(Loan.class)))
+                .thenReturn(loan);
+
+        loanService.createBulkAsync(
+                1L,
+                List.of(dto)
+        );
+
+        verify(taskService).markDone(1L);
+
+        verify(taskService, never())
+                .markFailed(anyLong(), anyString());
+    }
+
+    @Test
+    void createBulkAsync_shouldMarkTaskFailed_whenDatesInvalid() {
+
+        LoanDTO dto = new LoanDTO();
+
+        dto.setReaderId(1L);
+        dto.setBookId(1L);
+
+        dto.setIssueDate(LocalDate.now());
+        dto.setReturnDate(LocalDate.now().minusDays(1));
+
+        loanService.createBulkAsync(
+                1L,
+                List.of(dto)
+        );
+
+        verify(taskService).markFailed(
+                1L,
+                "Return date cannot be before issue date"
+        );
+
+        verify(taskService, never())
+                .markDone(anyLong());
+    }
+
+    @Test
+    void createBulkAsync_shouldMarkTaskFailed_whenReaderNotFound() {
+
+        LoanDTO dto = new LoanDTO();
+
+        dto.setReaderId(1L);
+        dto.setBookId(1L);
+
+        dto.setIssueDate(LocalDate.now());
+        dto.setReturnDate(LocalDate.now().plusDays(7));
+
+        when(readerRepository.findById(1L))
+                .thenReturn(Optional.empty());
+
+        loanService.createBulkAsync(
+                1L,
+                List.of(dto)
+        );
+
+        verify(taskService).markFailed(
+                1L,
+                "Reader not found with id = 1"
+        );
+
+        verify(taskService, never())
+                .markDone(anyLong());
     }
 }

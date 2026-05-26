@@ -1,19 +1,22 @@
 package com.library.service;
 import com.library.exception.InvalidLoanDatesException;
 import com.library.exception.ResourceNotFoundException;
-import com.library.model.Book;
-import com.library.model.Loan;
-import com.library.model.LoanDTO;
+import com.library.model.entity.Book;
+import com.library.model.entity.Loan;
+import com.library.model.dto.LoanDTO;
 import com.library.mapper.LoanMapper;
-import com.library.model.Reader;
+import com.library.model.entity.Reader;
 import com.library.repository.BookRepository;
 import com.library.repository.LoanRepository;
 import com.library.repository.ReaderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -24,6 +27,7 @@ public class LoanService {
     private final LoanRepository loanRepository;
     private final ReaderRepository readerRepository;
     private final BookRepository bookRepository;
+    private final TaskService taskService;
 
     public List<LoanDTO> getAll(Pageable pageable) {
         return loanRepository.findAll(pageable)
@@ -117,6 +121,74 @@ public class LoanService {
     @Transactional
     public List<LoanDTO> createBulkTransaction(List<LoanDTO> dtos) {
         return createBulkNoTransaction(dtos);
+    }
+
+    @Async
+    public CompletableFuture<Void> createBulkAsync(
+            Long taskId,
+            List<LoanDTO> dtos
+    ) {
+
+        try {
+
+            Thread.sleep(20000);
+
+            createBulkTransaction(dtos);
+
+            taskService.markDone(taskId);
+
+            log.info(
+                    "Async bulk operation completed successfully. taskId={}",
+                    taskId
+            );
+
+        } catch (InterruptedException ex) {
+
+            Thread.currentThread().interrupt();
+
+            log.error(
+                    "Async bulk operation was interrupted. taskId={}",
+                    taskId,
+                    ex
+            );
+
+            taskService.markFailed(
+                    taskId,
+                    "Task execution was interrupted"
+            );
+
+        } catch (
+                InvalidLoanDatesException |
+                ResourceNotFoundException ex
+        ) {
+
+            log.error(
+                    "Async bulk operation failed. taskId={}, error={}",
+                    taskId,
+                    ex.getMessage(),
+                    ex
+            );
+
+            taskService.markFailed(
+                    taskId,
+                    ex.getMessage()
+            );
+
+        } catch (Exception ex) {
+
+            log.error(
+                    "Unexpected async bulk operation error. taskId={}",
+                    taskId,
+                    ex
+            );
+
+            taskService.markFailed(
+                    taskId,
+                    "Unexpected server error"
+            );
+        }
+
+        return CompletableFuture.completedFuture(null);
     }
 }
 

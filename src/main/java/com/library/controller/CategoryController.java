@@ -1,7 +1,7 @@
 package com.library.controller;
 
 import com.library.exception.ErrorResponse;
-import com.library.model.CategoryDTO;
+import com.library.model.dto.CategoryDTO;
 import com.library.service.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

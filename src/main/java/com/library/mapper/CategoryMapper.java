@@ -1,9 +1,9 @@
 package com.library.mapper;
 
-import com.library.model.Book;
-import com.library.model.Category;
-import com.library.model.CategoryDTO;
-import com.library.model.CategoryDTO4BDTOF;
+import com.library.model.entity.Book;
+import com.library.model.entity.Category;
+import com.library.model.dto.CategoryDTO;
+import com.library.model.dto.CategoryDTO4BDTOF;
 
 import java.util.List;
 public class CategoryMapper {

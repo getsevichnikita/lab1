@@ -1,4 +1,4 @@
-package com.library.model;
+package com.library.model.entity;
 import lombok.*;
 import jakarta.persistence.*;
 import java.util.*;

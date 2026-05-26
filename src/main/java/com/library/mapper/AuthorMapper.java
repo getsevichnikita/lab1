@@ -1,8 +1,8 @@
 package com.library.mapper;
-import com.library.model.Author;
-import com.library.model.AuthorDTO;
-import com.library.model.AuthorDTO4BDTOF;
-import com.library.model.Book;
+import com.library.model.entity.Author;
+import com.library.model.dto.AuthorDTO;
+import com.library.model.dto.AuthorDTO4BDTOF;
+import com.library.model.entity.Book;
 import java.util.List;
 
 public class AuthorMapper {

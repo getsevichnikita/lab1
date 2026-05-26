@@ -1,7 +1,8 @@
 package com.library.controller;
 import com.library.exception.ErrorResponse;
-import com.library.model.LoanDTO;
+import com.library.model.dto.LoanDTO;
 import com.library.service.LoanService;
+import com.library.service.TaskService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -22,6 +23,7 @@ import java.util.List;
 public class LoanController {
 
     private final LoanService loanService;
+    private final TaskService taskService;
 
     @Operation(summary = "Get all loans")
     @ApiResponse(responseCode = "200", description = "Loans retrieved successfully")
@@ -124,5 +126,36 @@ public class LoanController {
         return loanService.createBulkTransaction(dtos);
     }
 
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Async task started successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Validation error",
+                    content = @Content(
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "404", description = "Book or reader not found",
+                    content = @Content(
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    ))
+    })
+    @Operation(
+            summary = "Bulk create loans asynchronously"
+    )
+    @PostMapping("/bulk/async")
+    public String createBulkAsync(
+            @RequestBody List<LoanDTO> dtos
+    ) {
+
+        Long taskId = taskService.createTask();
+
+        loanService.createBulkAsync(taskId, dtos);
+
+        return "Task started: " + taskId;
+    }
 }
 

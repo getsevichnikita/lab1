@@ -1,8 +1,8 @@
 package com.library.controller;
 
 import com.library.exception.ErrorResponse;
-import com.library.model.ReaderDTO;
-import com.library.model.ReaderDTONplus1;
+import com.library.model.dto.ReaderDTO;
+import com.library.model.dto.ReaderDTONplus1;
 import com.library.service.ReaderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

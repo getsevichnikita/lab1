@@ -1,4 +1,5 @@
-package com.library.model;
+package com.library.model.dto;
+
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -11,13 +12,13 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AuthorDTO {
-    @Schema(description = "Author identifier", example = "1")
-    private Long id;
 
-    @NotBlank(message = "Author name must not be blank")
-    @Size(max = 100, message = "Author name is too long")
-    @Schema(description = "Author name", example = "T. H. White")
+public class CategoryDTO {
+    @Schema(description = "Category identifier", example = "1")
+    private Long id;
+    @NotBlank(message = "Category name must not be blank")
+    @Size(max = 100)
+    @Schema(description = "Category name", example = "Novel")
     private String name;
 
     @Schema(description = "List of book ids", example = "[1,2]")
