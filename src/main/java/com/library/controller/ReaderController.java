@@ -1,6 +1,7 @@
 package com.library.controller;
 
 import com.library.exception.ErrorResponse;
+import com.library.model.dto.LoginRequest;
 import com.library.model.dto.ReaderDTO;
 import com.library.model.dto.ReaderDTONplus1;
 import com.library.service.ReaderService;
@@ -22,9 +23,11 @@ import java.util.List;
 @RequiredArgsConstructor
 @Tag(name = "Readers", description = "Reader management endpoints")
 public class ReaderController {
-
     private final ReaderService readerService;
-
+    @GetMapping("/by-name")
+    public ReaderDTO getByName(@RequestParam String name) {
+        return readerService.findByName(name);
+    }
     @Operation(summary = "Assign loans to the reader (non-transactional)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Loans assigned"),

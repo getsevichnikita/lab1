@@ -108,4 +108,14 @@ public class ReaderService {
     public void assignLoansTransaction(Long readerId, List<Long> loanIds) {
         assignLoansNoTransaction(readerId, loanIds);
     }
+
+    public ReaderDTO findByName(String name) {
+
+        Reader reader = readerRepository.findByName(name)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Reader not found")
+                );
+
+        return ReaderMapper.toDto(reader);
+    }
 }
