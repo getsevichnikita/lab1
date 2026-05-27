@@ -1,5 +1,6 @@
 package com.library.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.ExecutorService;
@@ -7,21 +8,19 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
-
-class TaskServiceTest {
+@Slf4j
+class UnsafeTaskServiceTest {
 
     @Test
-    void shouldWorkCorrectlyWithAtomicAndConcurrentMap()
-            throws Exception {
+    void shouldShowRaceCondition() throws Exception {
 
-        TaskService service =
-                new TaskService();
+        UnsafeTaskService service =
+                new UnsafeTaskService();
 
         try (
                 ExecutorService executor =
                         Executors.newFixedThreadPool(100)
         ) {
-
             int tasksCount = 10000;
 
             for (int i = 0; i < tasksCount; i++) {
@@ -35,13 +34,12 @@ class TaskServiceTest {
                     10,
                     TimeUnit.SECONDS
             );
-
             assertTrue(finished);
-            assertEquals(
+
+            assertNotEquals(
                     tasksCount,
                     service.getTasksCount()
             );
         }
-
     }
 }

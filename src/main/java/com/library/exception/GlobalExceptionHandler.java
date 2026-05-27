@@ -52,21 +52,30 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGeneral(
+    public ResponseEntity<ErrorResponse> handleException(
             Exception ex
     ) {
-        log.error("Unexpected server error", ex);
-        ErrorResponse response = ErrorResponse.of(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "Internal server error",
-                ex.getMessage()
+
+        log.error(
+                "Unexpected server error",
+                ex
         );
 
-        return new ResponseEntity<>(
-                response,
-                HttpStatus.INTERNAL_SERVER_ERROR
-        );
+        ErrorResponse errorResponse =
+                new ErrorResponse(
+                        LocalDateTime.now(),
+                        HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                        HttpStatus.INTERNAL_SERVER_ERROR
+                                .getReasonPhrase(),
+                        ex.getMessage()
+                );
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(errorResponse);
     }
+
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleNotFound(
             ResourceNotFoundException ex
