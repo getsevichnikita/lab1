@@ -27,6 +27,7 @@ const handleAuth = async () => {
                }
 
                onLogin(res.data.id);
+               localStorage.setItem("readerName", name);
                navigate("/profile");
 
            } catch (error) {

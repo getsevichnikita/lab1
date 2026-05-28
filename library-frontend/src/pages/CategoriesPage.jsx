@@ -1,97 +1,54 @@
+import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-
-import {
-    getCategories
-} from "../services/categoryService";
-
-import {
-    getBooks
-} from "../services/bookService";
+import { getCategories } from "../services/categoryService";
 
 function CategoriesPage() {
 
-    const [categories, setCategories] =
-        useState([]);
+    const location = useLocation();
+    const navigate = useNavigate();
 
-    const [books, setBooks] =
-        useState([]);
+    const params = new URLSearchParams(location.search);
+    const name = params.get("name") || "";
+
+    const [categories, setCategories] = useState([]);
 
     useEffect(() => {
-
         loadData();
-
-    }, []);
+    }, [location.search]);
 
     const loadData = async () => {
-
         try {
-
-            const categoriesData =
-                await getCategories();
-
-            const booksData =
-                await getBooks();
-
-            setCategories(categoriesData);
-
-            setBooks(booksData);
-
+            const data = await getCategories();
+            setCategories(data);
         } catch (error) {
-
             console.error(error);
         }
     };
 
-    const getBookTitles = (bookIds) => {
-
-        return books
-            .filter(book =>
-                bookIds?.includes(book.id)
-            )
-            .map(book => book.title)
-            .join(", ");
-    };
+    const filtered = name
+        ? categories.filter(c =>
+            c.name.toLowerCase().includes(name.toLowerCase())
+        )
+        : categories;
 
     return (
-
         <div className="page">
 
-            <h1>
-                Categories
-            </h1>
+            <h1>Categories</h1>
 
             <div className="books-grid">
-
-                {categories.map(category => (
-
+                {filtered.map(c => (
                     <div
+                        key={c.id}
                         className="book-card"
-                        key={category.id}
+                        onClick={() =>
+                            navigate(`/?category=${c.name}`)
+                        }
+                        style={{ cursor: "pointer" }}
                     >
-
-                        <h2>
-                            {category.name}
-                        </h2>
-
-                        <p>
-
-                            <strong>
-                                Books:
-                            </strong>
-
-                        </p>
-
-                        <p>
-                            {
-                                getBookTitles(
-                                    category.bookIds
-                                )
-                            }
-                        </p>
-
+                        {c.name}
                     </div>
                 ))}
-
             </div>
 
         </div>

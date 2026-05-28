@@ -1,97 +1,54 @@
+import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-
-import {
-    getAuthors
-} from "../services/authorService";
-
-import {
-    getBooks
-} from "../services/bookService";
+import { getAuthors } from "../services/authorService";
 
 function AuthorsPage() {
 
-    const [authors, setAuthors] =
-        useState([]);
+    const location = useLocation();
+    const navigate = useNavigate();
 
-    const [books, setBooks] =
-        useState([]);
+    const params = new URLSearchParams(location.search);
+    const name = params.get("name") || "";
+
+    const [authors, setAuthors] = useState([]);
 
     useEffect(() => {
-
         loadData();
-
-    }, []);
+    }, [location.search]);
 
     const loadData = async () => {
-
         try {
-
-            const authorsData =
-                await getAuthors();
-
-            const booksData =
-                await getBooks();
-
-            setAuthors(authorsData);
-
-            setBooks(booksData);
-
+            const data = await getAuthors();
+            setAuthors(data);
         } catch (error) {
-
             console.error(error);
         }
     };
 
-    const getBookTitles = (bookIds) => {
-
-        return books
-            .filter(book =>
-                bookIds?.includes(book.id)
-            )
-            .map(book => book.title)
-            .join(", ");
-    };
+    const filtered = name
+        ? authors.filter(a =>
+            a.name.toLowerCase().includes(name.toLowerCase())
+        )
+        : authors;
 
     return (
-
         <div className="page">
 
-            <h1>
-                Authors
-            </h1>
+            <h1>Authors</h1>
 
             <div className="books-grid">
-
-                {authors.map(author => (
-
+                {filtered.map(a => (
                     <div
+                        key={a.id}
                         className="book-card"
-                        key={author.id}
+                        onClick={() =>
+                            navigate(`/?author=${a.name}`)
+                        }
+                        style={{ cursor: "pointer" }}
                     >
-
-                        <h2>
-                            {author.name}
-                        </h2>
-
-                        <p>
-
-                            <strong>
-                                Books:
-                            </strong>
-
-                        </p>
-
-                        <p>
-                            {
-                                getBookTitles(
-                                    author.bookIds
-                                )
-                            }
-                        </p>
-
+                        {a.name}
                     </div>
                 ))}
-
             </div>
 
         </div>

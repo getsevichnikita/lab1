@@ -23,12 +23,16 @@ public class BookDTOFields {
     @Schema(description = "Book title", example = "War and Peace")
     private String title;
 
+    @NotBlank(message = "Book title must not be blank")
     @Min(value = 0, message = "This number can't be a year of AD era")
     @Max(value = 2027, message = "This year is not achieved yet")
     @Schema(description = "Publication year", example = "1869")
     private int publicationYear;
 
+    @NotBlank(message = "Book title must not be blank")
     @Schema(description = "List of authors")
     private List<AuthorDTO4BDTOF> authors;
+
+    @NotBlank(message = "Book title must not be blank")
     private List<CategoryDTO4BDTOF> categories;
 }

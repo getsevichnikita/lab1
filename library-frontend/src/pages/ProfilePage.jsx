@@ -1,11 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState  } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-function ProfilePage({ readerId }) {
+function ProfilePage({ readerId, readerName, onLogout }) {
 
     const [loans, setLoans] = useState([]);
     const [books, setBooks] = useState([]);
-    const [bookId, setBookId] = useState("");
+
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+    onLogout();
+    navigate("/login");
+};
 
   useEffect(() => {
       loadData();
@@ -31,29 +38,6 @@ function ProfilePage({ readerId }) {
         }
     };
 
-    const borrowBook = async () => {
-
-        try {
-
-            const payload = {
-                readerId: readerId,
-                bookId: Number(bookId),
-                issueDate: new Date().toISOString().split("T")[0],
-                returnDate: null
-            };
-
-            await axios.post(
-                "http://localhost:8080/loans",
-                payload
-            );
-
-            setBookId("");
-            loadData();
-
-        } catch (error) {
-            console.error(error);
-        }
-    };
 
     const getBookTitle = (id) => {
 
@@ -65,64 +49,54 @@ function ProfilePage({ readerId }) {
        loan => loan.readerId === Number(readerId)
    );
 
-    return (
+return (
 
-        <div className="page">
+    <div className="page">
 
-            <h1>My Profile</h1>
+        <div className="profile-header">
 
-            <p>
-                Current Reader ID: {readerId}
-            </p>
+            <h1>My Profile — {readerName}</h1>
 
-            {/* Borrow section */}
-            <div className="search-panel">
-
-                <input
-                    placeholder="Book ID"
-                    value={bookId}
-                    onChange={(e) =>
-                        setBookId(e.target.value)
-                    }
-                />
-
-                <button onClick={borrowBook}>
-                    Borrow Book
-                </button>
-
-            </div>
-
-            {/* Loans */}
-            <h2>My Loans</h2>
-
-            <div className="books-grid">
-
-                {myLoans.map(loan => (
-
-                    <div
-                        className="book-card"
-                        key={loan.id}
-                    >
-
-                        <h3>
-                            {getBookTitle(loan.bookId)}
-                        </h3>
-
-                        <p>
-                            Issue date: {loan.issueDate}
-                        </p>
-
-                        <p>
-                            Return date: {loan.returnDate || "not returned"}
-                        </p>
-
-                    </div>
-                ))}
-
-            </div>
+            <button
+                className="logout-btn"
+                onClick={handleLogout}
+            >
+                Logout
+            </button>
 
         </div>
-    );
+
+        {/* Loans */}
+        <h2>My Loans</h2>
+
+        <div className="books-grid">
+
+            {myLoans.map(loan => (
+
+                <div
+                    className="book-card"
+                    key={loan.id}
+                >
+
+                    <h3>
+                        {getBookTitle(loan.bookId)}
+                    </h3>
+
+                    <p>
+                        Issue date: {loan.issueDate}
+                    </p>
+
+                    <p>
+                        Return date: {loan.returnDate || "not returned"}
+                    </p>
+
+                </div>
+            ))}
+
+        </div>
+
+    </div>
+);
 }
 
 export default ProfilePage;

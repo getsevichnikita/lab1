@@ -1,4 +1,3 @@
-1
 import { Link } from "react-router-dom";
 
 function Navbar() {
@@ -8,7 +7,7 @@ function Navbar() {
         <nav className="navbar">
 
             <div className="logo">
-                Electronic Library
+                LiberLibrary
             </div>
 
             <div className="nav-links">

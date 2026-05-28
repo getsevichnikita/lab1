@@ -16,7 +16,24 @@ import LoginPage from "./pages/LoginPage";
 
 function App() {
 
-    const [readerId, setReaderId] = useState(null);
+    const [readerId, setReaderId] = useState(
+        () => {
+            const saved = localStorage.getItem("readerId");
+            return saved ? Number(saved) : null;
+        }
+    );
+
+    const login = (id) => {
+        setReaderId(id);
+        localStorage.setItem("readerId", id);
+        localStorage.setItem("readerName", user.name);
+
+    };
+
+    const logout = () => {
+        setReaderId(null);
+        localStorage.removeItem("readerId");
+    };
 
     return (
 
@@ -44,9 +61,7 @@ function App() {
                 <Route
                     path="/login"
                     element={
-                        <LoginPage
-                            onLogin={setReaderId}
-                        />
+                        <LoginPage onLogin={login} />
                     }
                 />
 
@@ -54,7 +69,11 @@ function App() {
                     path="/profile"
                     element={
                         readerId ? (
-                            <ProfilePage readerId={readerId} />
+                            <ProfilePage
+                                readerId={readerId}
+                                    readerName={localStorage.getItem("readerName")}
+                                onLogout={logout}
+                            />
                         ) : (
                             <Navigate to="/login" />
                         )
@@ -68,4 +87,3 @@ function App() {
 }
 
 export default App;
-
