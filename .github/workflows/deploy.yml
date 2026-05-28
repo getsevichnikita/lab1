@@ -11,10 +11,35 @@ env:
   RENDER_FRONTEND_HOOK: ${{ secrets.RENDER_FRONTEND_HOOK }}
 
 jobs:
-  # ============================================
-  # 1. ТЕСТЫ
-  # ============================================
-  test:
+
+  build-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+      - run: mvn clean package -DskipTests -B
+
+  build-frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./library-frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: './library-frontend/package-lock.json'
+      - run: npm ci
+      - run: npm run build
+
+  test-backend:
+    needs: build-backend
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -30,135 +55,56 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
-
-      - name: Run tests
+      - run: mvn test -B
         env:
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/testdb
           SPRING_DATASOURCE_USERNAME: test
           SPRING_DATASOURCE_PASSWORD: test
-        run: mvn test -B
 
-  # ============================================
-  # 2. СБОРКА БЭКЕНДА
-  # ============================================
-  build-backend:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-          cache: maven
-
-      - name: Build JAR
-        run: mvn clean package -DskipTests -B
-
-  # ============================================
-  # 3. СБОРКА ФРОНТЕНДА
-  # ============================================
-  build-frontend:
-    needs: test
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./library-frontend
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: './library-frontend/package-lock.json'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build frontend
-        run: npm run build
-
-  # ============================================
-  # 4. РАЗВЕРТЫВАНИЕ
-  # ============================================
   deploy:
-    needs: [build-backend, build-frontend]
+    needs: [test-backend, build-frontend]
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Render deploy
         run: |
-          echo "🚀 Triggering backend deploy..."
           curl -X POST "${{ env.RENDER_BACKEND_HOOK }}"
-          echo "✅ Backend deploy triggered"
-          echo "🚀 Triggering frontend deploy..."
+          echo " Backend deploy triggered"
           curl -X POST "${{ env.RENDER_FRONTEND_HOOK }}"
-          echo "✅ Frontend deploy triggered"
+          echo " Frontend deploy triggered"
 
-  # ============================================
-  # 5. HEALTHCHECK (с честным ожиданием)
-  # ============================================
+
   healthcheck:
     needs: deploy
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
-      - name: Health check backend (with retries)
+      - name: Health check backend
         run: |
-          echo "🏥 Checking backend health (waiting for cold start)..."
           for i in {1..15}; do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://library-api.onrender.com/actuator/health || echo "000")
-            echo "  Attempt $i/15: HTTP $STATUS"
-            if [ "$STATUS" = "200" ]; then
-              echo ""
-              echo "✅ Backend is healthy!"
-              exit 0
-            fi
+            echo "Backend attempt $i/15: HTTP $STATUS"
+            [ "$STATUS" = "200" ] && echo " Backend healthy!" && exit 0
             sleep 15
           done
-          echo ""
-          echo "❌ Backend health check FAILED after 15 attempts"
+          echo " Backend health check failed"
           exit 1
 
-      - name: Health check frontend (with retries)
+      - name: Health check frontend
         run: |
-          echo "🏥 Checking frontend health (waiting for cold start)..."
           for i in {1..10}; do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://library-frontend.onrender.com || echo "000")
-            echo "  Attempt $i/10: HTTP $STATUS"
-            if [ "$STATUS" = "200" ]; then
-              echo ""
-              echo "✅ Frontend is healthy!"
-              exit 0
-            fi
+            echo "Frontend attempt $i/10: HTTP $STATUS"
+            [ "$STATUS" = "200" ] && echo " Frontend healthy!" && exit 0
             sleep 15
           done
-          echo ""
-          echo "❌ Frontend health check FAILED after 10 attempts"
+          echo " Frontend health check failed"
           exit 1
-
-      - name: Summary
-        if: always()
-        run: |
-          echo ""
-          echo "=============================================="
-          echo "🎉 CI/CD Pipeline Complete!"
-          echo "=============================================="
-          echo "🔹 Backend:  https://library-api.onrender.com"
-          echo "🔹 Frontend: https://library-frontend.onrender.com"
-          echo "=============================================="
