@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast } from "react-toastify";
+
 
 function LoginPage({ onLogin }) {
     const navigate = useNavigate();
@@ -16,18 +18,17 @@ const handleAuth = async () => {
 
                try {
                    res = await axios.post("http://localhost:8080/auth/login", {
-                       username: name,
+                       name: name,
                        password
                    });
                } catch (e) {
                    res = await axios.post("http://localhost:8080/auth/register", {
-                       username: name,
+                       name: name,
                        password
                    });
                }
 
-               onLogin(res.data.id);
-               localStorage.setItem("readerName", name);
+               onLogin(res.data.id, name);
                navigate("/profile");
 
            } catch (error) {

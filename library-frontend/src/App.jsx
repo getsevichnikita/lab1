@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import UploadBookPage from "./pages/UploadBookPage";
 import {
     BrowserRouter,
     Routes,
@@ -23,22 +26,35 @@ function App() {
         }
     );
 
-    const login = (id) => {
+const [readerName, setReaderName] = useState(
+    () => localStorage.getItem("readerName")
+);
+    const login = (id, name) => {
         setReaderId(id);
+        setReaderName(name);
         localStorage.setItem("readerId", id);
-        localStorage.setItem("readerName", user.name);
-
+        localStorage.setItem("readerName", name);
     };
 
-    const logout = () => {
-        setReaderId(null);
-        localStorage.removeItem("readerId");
-    };
+  const logout = () => {
+      setReaderId(null);
+      setReaderName(null);
+      localStorage.removeItem("readerId");
+      localStorage.removeItem("readerName");
+  };
 
     return (
 
         <BrowserRouter>
-
+    <ToastContainer
+                position="bottom-left"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop
+                closeOnClick
+                pauseOnHover
+                draggable
+            />
             <Navbar />
 
             <Routes>
@@ -46,6 +62,11 @@ function App() {
                 <Route
                     path="/"
                     element={<BooksPage />}
+                />
+
+                <Route
+                        path="/upload-book"
+                        element={<UploadBookPage />}
                 />
 
                 <Route
@@ -71,7 +92,7 @@ function App() {
                         readerId ? (
                             <ProfilePage
                                 readerId={readerId}
-                                    readerName={localStorage.getItem("readerName")}
+                                readerName={readerName}
                                 onLogout={logout}
                             />
                         ) : (

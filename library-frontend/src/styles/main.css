@@ -1,3 +1,6 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
 body {
     margin: 0;
     background-color: #f5f1e8;
@@ -5,7 +8,7 @@ body {
     color: #2d2d2d;
 }
 
-/* NAVBAR */
+
 .navbar {
     background-color: #d8c9a3;
     border-bottom: 2px solid #a58b5e;
@@ -43,7 +46,6 @@ body {
     box-sizing: border-box;
 }
 
-/* HEADINGS */
 h1 {
     color: #08060d;
 }
@@ -58,6 +60,26 @@ input {
     outline: none;
 }
 
+.search-panel-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 30px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #fffdf8;
+  border: 1px solid #d8c9a3;
+}
+
+.search-panel-vertical input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #a58b5e;
+  background-color: #fffdf8;
+  font-size: 16px;
+  border-radius: 8px;
+}
+
 .search-panel {
     display: flex;
     grid-template-columns: repeat(5, 1fr);
@@ -69,32 +91,26 @@ input {
     background: #fffdf8;
     border: 1px solid #d8c9a3;
 }
-
 .search-panel input {
     width: 100%;
     flex: 1;
     padding: 10px;
     border: 1px solid #a58b5e;
-        background-color: #fffdf8;
+    background-color: #fffdf8;
     font-size: 16px;
     border-radius: 8px;
-
 }
-
-/* ===== BUTTONS (GLOBAL STYLE) ===== */
-
 button {
     border-radius: 8px;
     transition: 0.2s;
 }
 
-/* main buttons */
 .search-panel button,
 .borrow-btn,
 .logout-btn {
     padding: 10px 18px;
     background-color: #a58b5e;
-    color: white;
+    color: black;
     border: none;
     cursor: pointer;
     font-size: 16px;
@@ -106,7 +122,6 @@ button {
     background-color: #8c744d;
 }
 
-/* CLOSE BUTTON (modal special) */
 .close-btn {
     background: none;
     border: none;
@@ -154,7 +169,6 @@ button {
     color: #3b2f1d;
 }
 
-/* MODAL */
 .modal-overlay {
     position: fixed;
     inset: 0;
@@ -182,5 +196,72 @@ button {
 .modal-actions {
     display: flex;
     justify-content: flex-start;
-    margin-top: 20px;
+    margin-right: 20px;
+    gap: 10px;
+
 }
+
+.modal-body input {
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 10px;
+    margin-bottom: 12px;
+
+    border: 1px solid #a58b5e;
+    border-radius: 8px;
+
+    background-color: #fffdf8;
+    color: #08060d;
+
+    font-size: 16px;
+    font-family: Georgia, serif;
+
+    outline: none;
+}
+
+.modal-body input:focus {
+    border-color: #8c744d;
+    box-shadow: 0 0 0 2px rgba(165, 139, 94, 0.2);
+}
+
+.list-column {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    margin-bottom: 15px;
+}
+
+.list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    background: #f5f1e8;
+
+    border: 1px solid #d8c9a3;
+    border-radius: 8px;
+
+    padding: 8px 12px;
+
+    color: #3b2f1d;
+}
+
+
+.list-item button {
+    padding: 4px 10px;
+    font-size: 14px;
+}
+
+
+.modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+
+
+
+

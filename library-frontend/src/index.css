@@ -105,3 +105,45 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  background-color: #f0f0f0;
+  border-radius: 16px;
+  padding: 3px 10px;
+  font-size: 0.9em;
+  color: #333;
+  line-height: 1.4;
+}
+
+.tag-remove {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 1.2em;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+  margin-left: 6px;
+  transition: color 0.2s;
+}
+
+.tag-remove:hover {
+  color: #666;
+}
+
+.edit-form input {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}

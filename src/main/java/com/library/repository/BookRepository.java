@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
 
@@ -41,4 +42,5 @@ public interface BookRepository extends JpaRepository<Book, Long> {
             @Param("authorName") String authorName,
             Pageable pageable
     );
+
 }

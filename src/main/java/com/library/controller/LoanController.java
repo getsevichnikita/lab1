@@ -157,5 +157,9 @@ public class LoanController {
 
         return "Task started: " + taskId;
     }
+    @GetMapping ("/reader")
+    public List<LoanDTO> getByReader(@RequestParam Long readerId, Pageable pageable) {
+        return loanService.getByReader(readerId, pageable);
+    }
 }
 

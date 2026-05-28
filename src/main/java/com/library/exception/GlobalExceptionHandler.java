@@ -94,4 +94,22 @@ public class GlobalExceptionHandler {
                 HttpStatus.NOT_FOUND
         );
     }
+    @ExceptionHandler(BookAlreadyBorrowedException.class)
+    public ResponseEntity<ErrorResponse> handleBookAlreadyBorrowed(
+            BookAlreadyBorrowedException ex
+    ) {
+
+        log.warn("Book already borrowed: {}", ex.getMessage());
+
+        ErrorResponse response = ErrorResponse.of(
+                HttpStatus.BAD_REQUEST,
+                "Book already borrowed",
+                ex.getMessage()
+        );
+
+        return new ResponseEntity<>(
+                response,
+                HttpStatus.BAD_REQUEST
+        );
+    }
 }

@@ -4,6 +4,9 @@ import com.library.model.entity.Book;
 import com.library.model.dto.BookDTO;
 import com.library.model.dto.BookDTOFields;
 import com.library.model.entity.Category;
+import com.library.model.dto.AuthorDTO4BDTOF;
+import com.library.model.dto.CategoryDTO4BDTOF;
+import com.library.model.dto.BookDTOFieldsOwner;
 import java.util.List;
 
 public class BookMapper {
@@ -75,5 +78,18 @@ public class BookMapper {
         );
 
         return book;
+    }
+    public static BookDTOFieldsOwner toDtoFieldsOwner(Book book) {
+        return BookDTOFieldsOwner.builder()
+                .id(book.getId())
+                .title(book.getTitle())
+                .publicationYear(book.getPublicationYear())
+                .authors(book.getAuthors().stream()
+                        .map(a -> new AuthorDTO4BDTOF(a.getId(), a.getName()))
+                        .toList())
+                .categories(book.getCategories().stream()
+                        .map(c -> new CategoryDTO4BDTOF(c.getId(), c.getName()))
+                        .toList())
+                .build();
     }
 }

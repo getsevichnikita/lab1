@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Schema(description = "Data transfer object for book (IDs)")
-public class BookDTOFields {
+public class BookDTOFieldsOwner {
     @Schema(description = "Book identifier", example = "1")
     private Long id;
 
@@ -36,4 +36,6 @@ public class BookDTOFields {
 
     @NotEmpty(message = "Book title must not be blank")
     private List<CategoryDTO4BDTOF> categories;
+
+    private Long ownerId;
 }

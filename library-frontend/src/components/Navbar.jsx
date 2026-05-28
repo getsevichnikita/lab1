@@ -24,9 +24,14 @@ function Navbar() {
                     Categories
                 </Link>
 
+                <Link to="/upload-book">
+                    Upload Book
+                </Link>
+
                 <Link to="/profile">
                     Profile
                 </Link>
+
 
             </div>
 

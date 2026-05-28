@@ -1,4 +1,5 @@
 package com.library.service;
+import com.library.exception.BookAlreadyBorrowedException;
 import com.library.exception.InvalidLoanDatesException;
 import com.library.exception.ResourceNotFoundException;
 import com.library.model.entity.Book;
@@ -14,6 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -28,6 +31,13 @@ public class LoanService {
     private final ReaderRepository readerRepository;
     private final BookRepository bookRepository;
     private final TaskService taskService;
+
+    public List<LoanDTO> getByReader(Long readerId, Pageable pageable) {
+        return loanRepository.findByReaderId(readerId, pageable)
+                .stream()
+                .map(LoanMapper::toDto)
+                .toList();
+    }
 
     public List<LoanDTO> getAll(Pageable pageable) {
         return loanRepository.findAll(pageable)
@@ -63,6 +73,13 @@ public class LoanService {
                         "Book not found with id = " + dto.getBookId()
                 )
         );
+        if (loanRepository.existsByBookIdAndReturnDateAfter(
+                dto.getBookId(),
+                LocalDate.now()
+        )) {
+            throw new BookAlreadyBorrowedException("Book already borrowed");
+        }
+
 
         Loan loan = LoanMapper.toEntity(dto, reader, book);
         log.info("Loan created with id={}", dto.getId());
