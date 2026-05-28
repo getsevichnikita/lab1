@@ -31,3 +31,20 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Environment
+.env
+
+# Uploads
+uploads/
+
+# Docker
+pgdata/
+
+# Node
+node_modules/
+dist/
+
+# Java
+target/
+*.jar
