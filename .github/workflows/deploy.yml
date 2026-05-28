@@ -90,7 +90,7 @@ jobs:
       - name: Health check backend
         run: |
           for i in {1..15}; do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://library-api.onrender.com/actuator/health || echo "000")
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://library-api-v8wu.onrender.com/actuator/health || echo "000")
             echo "Backend attempt $i/15: HTTP $STATUS"
             [ "$STATUS" = "200" ] && echo " Backend healthy!" && exit 0
             sleep 15
@@ -101,7 +101,7 @@ jobs:
       - name: Health check frontend
         run: |
           for i in {1..10}; do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://library-frontend.onrender.com || echo "000")
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://liberlibrary.onrender.com|| echo "000")
             echo "Frontend attempt $i/10: HTTP $STATUS"
             [ "$STATUS" = "200" ] && echo " Frontend healthy!" && exit 0
             sleep 15
