@@ -52,7 +52,7 @@ function LoginPage({ onLogin }) {
                 toast.error("User with this name already exists.");
             } else if (error.response?.status === 500) {
                 toast.error("Server error. Please try again later.");
-            } else if (!error.response) {
+            } else if (error.response==null) {
                 toast.error("Cannot connect to server. Check your internet connection.");
             } else {
                 toast.error(error.response?.data?.message || "Authentication failed");
