@@ -92,7 +92,6 @@ function UploadBookPage() {
 
       toast.success("Book uploaded");
 
-      // Очистка формы после успешной загрузки
       setTitle("");
       setPublicationYear("");
       setSelectedAuthors([]);

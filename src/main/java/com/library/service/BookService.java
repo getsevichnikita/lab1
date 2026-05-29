@@ -17,7 +17,6 @@ import com.library.repository.AuthorRepository;
 import com.library.repository.BookRepository;
 import com.library.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,7 +75,7 @@ public class BookService {
             BookDTOFieldsOwner dto = BookMapper.toDtoFieldsOwner(book);
 
             bookPDFRepository.findByBookId(book.getId()).ifPresent(pdf ->
-                dto.setOwnerId(pdf.getOwnerId())
+                    dto.setOwnerId(pdf.getOwnerId())
             );
 
             return dto;
@@ -85,7 +84,7 @@ public class BookService {
 
     public BookDTO getById(Long id) {
         return BookMapper.toDto(
-                bookRepository.findById(id) .orElseThrow(() ->
+                bookRepository.findById(id).orElseThrow(() ->
                         new ResourceNotFoundException(
                                 LOG_BOOK_NOT_FOUND + id
                         )
@@ -211,96 +210,85 @@ public class BookService {
         return result;
     }
 
-        public BookDTO uploadBook(
-                BookDTOFieldsOwner dto,
-                MultipartFile file
-        ) {
-
-            if (file.isEmpty()) {
-                throw new RuntimeException("PDF file is required");
-            }
-
-            if (!file.getContentType().equals("application/pdf")) {
-                throw new RuntimeException("Only PDF allowed");
-            }
-
-            try {
-
-                String uploadDir = "uploads/";
-
-                File dir = new File(uploadDir);
-
-                if (!dir.exists()) {
-                    dir.mkdirs();
-                }
-
-                String fileName =
-                        UUID.randomUUID() + "_" + file.getOriginalFilename();
-
-                Path path = Paths.get(uploadDir + fileName);
-
-                Files.write(path, file.getBytes());
-
-                Book book = new Book();
-
-                book.setTitle(dto.getTitle());
-                book.setPublicationYear(dto.getPublicationYear());
-
-
-                List<Author> authors = dto.getAuthors()
-                        .stream()
-                        .map(a -> {
-
-                            Optional<Author> existing =
-                                    authorRepository.findByName(a.getName());
-
-                            return existing.orElseGet(() -> {
-
-                                Author author = new Author();
-                                author.setName(a.getName());
-
-                                return authorRepository.save(author);
-                            });
-                        })
-                        .toList();
-
-                book.setAuthors(authors);
-
-                List<Category> categories = dto.getCategories()
-                        .stream()
-                        .map(c -> {
-
-                            Optional<Category> existing =
-                                    categoryRepository.findByName(c.getName());
-
-                            return existing.orElseGet(() -> {
-
-                                Category category = new Category();
-                                category.setName(c.getName());
-
-                                return categoryRepository.save(category);
-                            });
-                        })
-                        .toList();
-
-                book.setCategories(categories);
-
-                Book savedBook = bookRepository.save(book);
-
-                BookPDF pdf = new BookPDF();
-
-                pdf.setBook(savedBook);
-                pdf.setFilePath(path.toString());
-                pdf.setOwnerId(dto.getOwnerId());
-                bookPDFRepository.save(pdf);
-
-                return BookMapper.toDto(savedBook);
-
-            } catch (IOException e) {
-
-                throw new RuntimeException("Failed to upload file");
-            }
+    public BookDTO uploadBook(BookDTOFieldsOwner dto, MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new RuntimeException("PDF file is required");
         }
+
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.equals("application/pdf")) {
+            throw new RuntimeException("Only PDF allowed");
+        }
+
+        try {
+            String uploadDir = "uploads/";
+            File dir = new File(uploadDir);
+
+            if (!dir.exists()) {
+                boolean created = dir.mkdirs();
+                if (!created) {
+                    throw new RuntimeException("Failed to create upload directory");
+                }
+            }
+
+            String safeFilename = extractSafeFilename(file.getOriginalFilename());
+            String fileName = UUID.randomUUID() + "_" + safeFilename;
+
+            Path uploadPath = Paths.get(uploadDir).toAbsolutePath();
+            Path path = uploadPath.resolve(fileName).normalize();
+
+            if (!path.startsWith(uploadPath)) {
+                throw new SecurityException("Invalid file path");
+            }
+
+            Files.write(path, file.getBytes());
+
+            Book book = new Book();
+            book.setTitle(dto.getTitle());
+            book.setPublicationYear(dto.getPublicationYear());
+
+            List<Author> authors = dto.getAuthors().stream()
+                    .map(a -> {
+                        Optional<Author> existing = authorRepository.findByName(a.getName());
+                        return existing.orElseGet(() -> {
+                            Author author = new Author();
+                            author.setName(a.getName());
+                            return authorRepository.save(author);
+                        });
+                    })
+                    .toList();
+
+            book.setAuthors(authors);
+
+            List<Category> categories = dto.getCategories().stream()
+                    .map(c -> {
+                        Optional<Category> existing = categoryRepository.findByName(c.getName());
+                        return existing.orElseGet(() -> {
+                            Category category = new Category();
+                            category.setName(c.getName());
+                            return categoryRepository.save(category);
+                        });
+                    })
+                    .toList();
+
+            book.setCategories(categories);
+
+            Book savedBook = bookRepository.save(book);
+
+            BookPDF pdf = new BookPDF();
+            pdf.setBook(savedBook);
+            pdf.setFilePath(path.toString());
+            pdf.setFileName(safeFilename);
+            pdf.setUploadedAt(LocalDateTime.now());
+            pdf.setOwnerId(dto.getOwnerId());
+            bookPDFRepository.save(pdf);
+
+            return BookMapper.toDto(savedBook);
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to upload file", e);
+        }
+    }
 
     public void updatePdf(Long bookId, MultipartFile file) {
         Book book = bookRepository.findById(bookId)
@@ -310,8 +298,16 @@ public class BookService {
                 .orElse(new BookPDF());
 
         String uploadDir = "uploads/";
-        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-        Path path = Paths.get(uploadDir + fileName);
+        String safeFilename = extractSafeFilename(file.getOriginalFilename());
+        String fileName = UUID.randomUUID() + "_" + safeFilename;
+
+        Path uploadPath = Paths.get(uploadDir).toAbsolutePath();
+        Path path = uploadPath.resolve(fileName).normalize();
+
+        if (!path.startsWith(uploadPath)) {
+            throw new SecurityException("Invalid file path");
+        }
+
         try {
             Files.write(path, file.getBytes());
         } catch (IOException e) {
@@ -320,9 +316,23 @@ public class BookService {
 
         pdf.setBook(book);
         pdf.setFilePath(path.toString());
-        pdf.setFileName(file.getOriginalFilename());
+        pdf.setFileName(safeFilename);
         pdf.setUploadedAt(LocalDateTime.now());
         bookPDFRepository.save(pdf);
+    }
+
+    private String extractSafeFilename(String originalFilename) {
+        if (originalFilename == null || originalFilename.isEmpty()) {
+            return "file.pdf";
+        }
+
+        String name = new File(originalFilename).getName();
+
+        if (name.isEmpty()) {
+            return "file.pdf";
+        }
+
+        return name;
     }
 
     private void invalidateCache() {
