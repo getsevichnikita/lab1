@@ -2,7 +2,14 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
+import PropTypes from 'prop-types';
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+ProfilePage.propTypes = {
+  readerId: PropTypes.number,
+  readerName: PropTypes.string,
+  onLogout: PropTypes.func.isRequired,
+};
 function ProfilePage({ readerId, readerName, onLogout }) {
   const [activeTab, setActiveTab] = useState("loans");
 
@@ -32,16 +39,10 @@ function ProfilePage({ readerId, readerName, onLogout }) {
     navigate("/login");
   };
 
- useEffect(() => {
-     if (!readerId) return;
-     loadData();
-
-     if (!readerName) {
-         const savedName = localStorage.getItem("readerName");
-         if (savedName) {
-         }
-     }
- }, [readerId]);
+  useEffect(() => {
+    if (!readerId) return;
+    loadData();
+  }, [readerId]);
 
   const resetSelection = () => {
     setSelectedLoan(null);
@@ -50,37 +51,33 @@ function ProfilePage({ readerId, readerName, onLogout }) {
     setNewPdfFile(null);
   };
 
-    const loadData = async () => {
-        try {
-            const [loansRes, booksRes] = await Promise.all([
-                axios.get(`http://localhost:8080/loans/reader?readerId=${readerId}&page=0&size=100`),
-                axios.get("http://localhost:8080/books?page=0&size=100"),
-            ]);
+  const loadData = async () => {
+    try {
+      const [loansRes, booksRes] = await Promise.all([
+        axios.get(`${API_URL}/loans/reader?readerId=${readerId}&page=0&size=100`),
+        axios.get(`${API_URL}/books?page=0&size=100`),
+      ]);
 
-            const allBooks = Array.isArray(booksRes.data)
-                ? booksRes.data
-                : (booksRes.data.content || []);
+      const allBooks = Array.isArray(booksRes.data)
+        ? booksRes.data
+        : (booksRes.data.content || []);
 
-            setLoans(loansRes.data || []);
-            setBooks(allBooks);
+      setLoans(loansRes.data || []);
+      setBooks(allBooks);
 
-            const currentReaderId = readerId ? Number(readerId) : null;
-            console.log('Filtering with readerId:', currentReaderId);
+      const currentReaderId = readerId ? Number(readerId) : null;
 
-            const my = allBooks.filter(b => {
-                const bookOwnerId = b.ownerId != null ? Number(b.ownerId) : null;
-                const match = bookOwnerId !== null && bookOwnerId === currentReaderId;
-                console.log(`Book "${b.title}" (ownerId=${b.ownerId}) → ${match ? 'MY' : 'NOT MY'}`);
-                return match;
-            });
+      const my = allBooks.filter(b => {
+        const bookOwnerId = b.ownerId != null ? Number(b.ownerId) : null;
+        return bookOwnerId !== null && bookOwnerId === currentReaderId;
+      });
 
-            console.log('My books found:', my.length);
-            setMyBooks(my);
-
-        } catch (error) {
-            console.error(error);
-        }
-    };
+      setMyBooks(my);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to load data");
+    }
+  };
 
   const getBookById = (id) => books.find(b => b.id === id);
   const getBookTitle = (id) => {
@@ -94,7 +91,7 @@ function ProfilePage({ readerId, readerName, onLogout }) {
 
   const cancelLoan = async (loanId) => {
     try {
-      await axios.delete(`http://localhost:8080/loans/${loanId}`);
+      await axios.delete(`${API_URL}/loans/${loanId}`);
       setLoans(prev => prev.filter(l => l.id !== loanId));
       resetSelection();
       toast.success("Loan cancelled");
@@ -106,7 +103,7 @@ function ProfilePage({ readerId, readerName, onLogout }) {
 
   const deleteBook = async (id) => {
     try {
-      await axios.delete(`http://localhost:8080/books/${id}`);
+      await axios.delete(`${API_URL}/books/${id}`);
       setBooks(prev => prev.filter(b => b.id !== id));
       setMyBooks(prev => prev.filter(b => b.id !== id));
       resetSelection();
@@ -162,7 +159,7 @@ function ProfilePage({ readerId, readerName, onLogout }) {
   const ensureEntityExists = async (type, name) => {
     try {
       const endpoint = type === "author" ? "authors" : "categories";
-      const res = await axios.post(`http://localhost:8080/${endpoint}`, { name });
+      const res = await axios.post(`${API_URL}/${endpoint}`, { name });
       return res.data.id;
     } catch (error) {
       console.error(`Failed to create ${type}: ${name}`, error);
@@ -187,7 +184,7 @@ function ProfilePage({ readerId, readerName, onLogout }) {
         })
       );
 
-      await axios.put(`http://localhost:8080/books/${selectedBook.id}`, {
+      await axios.put(`${API_URL}/books/${selectedBook.id}`, {
         title: editTitle,
         publicationYear: Number(editYear),
         authorIds,
@@ -198,7 +195,7 @@ function ProfilePage({ readerId, readerName, onLogout }) {
         const formData = new FormData();
         formData.append("file", newPdfFile);
         try {
-       await axios.put(`http://localhost:8080/books/${selectedBook.id}/pdf`, formData);
+          await axios.put(`${API_URL}/books/${selectedBook.id}/pdf`, formData);
           toast.success("PDF updated");
         } catch (pdfError) {
           console.error(pdfError);
@@ -228,10 +225,10 @@ function ProfilePage({ readerId, readerName, onLogout }) {
 
   const openPdf = async (bookId, download = false) => {
     try {
-      const res = await axios.get(`http://localhost:8080/books/${bookId}/pdf`, {
+      const res = await axios.get(`${API_URL}/books/${bookId}/pdf`, {
         responseType: "blob",
       });
-      const url = window.URL.createObjectURL(res.data);
+    const url = globalThis.URL.createObjectURL(res.data);
       if (download) {
         const a = document.createElement("a");
         a.href = url;
@@ -242,6 +239,7 @@ function ProfilePage({ readerId, readerName, onLogout }) {
       }
     } catch (error) {
       console.error(error);
+      toast.error("Failed to open PDF");
     }
   };
 

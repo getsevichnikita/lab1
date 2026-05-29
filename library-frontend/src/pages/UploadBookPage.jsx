@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 function UploadBookPage() {
   const [title, setTitle] = useState("");
@@ -13,10 +15,8 @@ function UploadBookPage() {
 
   const [pdfFile, setPdfFile] = useState(null);
 
-  // Получаем readerId из localStorage (для проверки авторизации)
   const readerId = localStorage.getItem("readerId");
 
-  // Обработчик добавления автора
   const addAuthor = () => {
     if (!authorInput.trim()) return;
     setSelectedAuthors(prev => [
@@ -26,7 +26,6 @@ function UploadBookPage() {
     setAuthorInput("");
   };
 
-  // Обработчик добавления категории
   const addCategory = () => {
     if (!categoryInput.trim()) return;
     setSelectedCategories(prev => [
@@ -36,25 +35,20 @@ function UploadBookPage() {
     setCategoryInput("");
   };
 
-  // Удаление автора по id
   const removeAuthor = (id) => {
     setSelectedAuthors(prev => prev.filter(a => a.id !== id));
   };
 
-  // Удаление категории по id
   const removeCategory = (id) => {
     setSelectedCategories(prev => prev.filter(c => c.id !== id));
   };
 
-  // Загрузка книги на сервер
   const uploadBook = async () => {
-    // 1. Проверка авторизации
     if (!readerId) {
       toast.info("Login first");
       return;
     }
 
-    // 2. Валидация полей
     if (!title.trim()) {
       toast.error("Enter title");
       return;
@@ -77,7 +71,6 @@ function UploadBookPage() {
     }
 
     try {
-      // DTO книги (как ожидает сервер)
       const bookDto = {
         title,
         publicationYear: Number(publicationYear),
@@ -86,7 +79,6 @@ function UploadBookPage() {
         ownerId: Number(readerId),
       };
 
-      // Собираем multipart/form-data
       const formData = new FormData();
       formData.append(
         "book",
@@ -94,11 +86,19 @@ function UploadBookPage() {
       );
       formData.append("file", pdfFile);
 
-      await axios.post("http://localhost:8080/books/upload", formData, {
+      await axios.post(`${API_URL}/books/upload`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
       toast.success("Book uploaded");
+
+      // Очистка формы после успешной загрузки
+      setTitle("");
+      setPublicationYear("");
+      setSelectedAuthors([]);
+      setSelectedCategories([]);
+      setPdfFile(null);
+
     } catch (error) {
       console.error(error);
       toast.error(error.response?.data?.message || "Upload failed");
@@ -110,14 +110,12 @@ function UploadBookPage() {
       <h1>Upload Book</h1>
 
       <div className="search-panel-vertical">
-        {/* Название */}
         <input
           placeholder="Title..."
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
 
-        {/* Год */}
         <input
           type="number"
           placeholder="Publication year..."
@@ -125,7 +123,6 @@ function UploadBookPage() {
           onChange={(e) => setPublicationYear(e.target.value)}
         />
 
-        {/* Авторы */}
         <input
           placeholder="Add author (Enter)..."
           value={authorInput}
@@ -153,7 +150,6 @@ function UploadBookPage() {
           ))}
         </div>
 
-        {/* Категории */}
         <input
           placeholder="Add category (Enter)..."
           value={categoryInput}
@@ -181,14 +177,12 @@ function UploadBookPage() {
           ))}
         </div>
 
-        {/* PDF */}
         <input
           type="file"
           accept="application/pdf"
           onChange={(e) => setPdfFile(e.target.files[0])}
         />
 
-        {/* Кнопка отправки */}
         <button className="borrow-btn" onClick={uploadBook}>
           Upload
         </button>

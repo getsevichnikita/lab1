@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { getBooks } from "../services/bookService";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 function BooksPage() {
     const [pdfUrl, setPdfUrl] = useState(null);
@@ -97,7 +98,7 @@ function BooksPage() {
         returnDate.setDate(today.getDate() + 14);
 
         try {
-            await axios.post("http://localhost:8080/loans", {
+            await axios.post(`${API_URL}/loans`, {
                 readerId: Number(readerId),
                 bookId: Number(bookId),
                 issueDate: today.toISOString().split("T")[0],
@@ -122,7 +123,7 @@ function BooksPage() {
 
     const openPdf = async (bookId) => {
         const blob = await axios
-            .get(`http://localhost:8080/books/${bookId}/pdf`, {
+            .get(`${API_URL}/books/${bookId}/pdf`, {
                 responseType: "blob",
             })
             .then((res) => res.data);
@@ -132,7 +133,7 @@ function BooksPage() {
 
     const downloadPdf = async (bookId, title) => {
         const blob = await axios
-            .get(`http://localhost:8080/books/${bookId}/pdf`, {
+            .get(`${API_URL}/books/${bookId}/pdf`, {
                 responseType: "blob",
             })
             .then((res) => res.data);

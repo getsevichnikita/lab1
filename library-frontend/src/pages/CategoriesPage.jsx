@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { getCategories } from "../services/categoryService";
 import { toast } from "react-toastify";
 
-
 function CategoriesPage() {
 
     const location = useLocation();
