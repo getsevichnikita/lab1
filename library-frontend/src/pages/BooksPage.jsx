@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { getBooks } from "../services/bookService";
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+const API_URL = "https://library-api-v8wu.onrender.com";
 
 function BooksPage() {
     const [pdfUrl, setPdfUrl] = useState(null);

@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import PropTypes from 'prop-types';
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+const API_URL = "https://library-api-v8wu.onrender.com";
 ProfilePage.propTypes = {
   readerId: PropTypes.number,
   readerName: PropTypes.string,

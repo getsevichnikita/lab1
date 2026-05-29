@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+const API_URL = "https://library-api-v8wu.onrender.com";
 
 export const getBookPdf = async (bookId, mode = "inline") => {
     const res = await axios.get(

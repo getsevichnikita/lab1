@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+const API_URL = "https://library-api-v8wu.onrender.com";
 
 function LoginPage({ onLogin }) {
     const navigate = useNavigate();
