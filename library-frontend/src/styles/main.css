@@ -22,6 +22,10 @@ body {
     font-size: 28px;
     font-weight: bold;
     color: #3b2f1d;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
 }
 
 .nav-links {
@@ -400,8 +404,6 @@ button {
     background-color: #8c744d;
     transform: translateY(-2px);
 }
-
-
 
 .nav-logo {
     width: 36px;

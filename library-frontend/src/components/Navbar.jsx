@@ -4,8 +4,7 @@ function Navbar() {
     return (
         <nav className="navbar">
             <Link to="/" className="logo">
-               <img src="/LLlogo.png" alt="Logo" className="nav-logo" />
-                  LiberLibrary
+               <img src="/LLlogo.png" alt="Logo" className="nav-logo" />LiberLibrary
              </Link>
             <div className="nav-links">
                 <Link to="/books">Книги</Link>
