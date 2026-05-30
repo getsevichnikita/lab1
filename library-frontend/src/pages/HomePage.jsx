@@ -14,9 +14,9 @@ function HomePage() {
             <div style={{ display: "flex", justifyContent: "center", gap: "20px", flexWrap: "wrap" }}>
                 <Link to="/books" className="home-btn">Искать Книги</Link>
                 <Link to="/authors" className="home-btn">Авторы</Link>
-                <Link to="/categories">Жанры</Link>
-                <Link to="/upload-book">Опубликовать книгу</Link>
-                <Link to="/profile">Учётная запись</Link>
+                <Link to="/categories" className="home-btn">Жанры</Link>
+                <Link to="/upload-book" className="home-btn">Опубликовать книгу</Link>
+                <Link to="/profile" className="home-btn">Учётная запись</Link>
             </div>
         </div>
     );
