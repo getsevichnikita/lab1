@@ -361,7 +361,7 @@ public class BookService {
 
         try (PDDocument document = Loader.loadPDF(pdf.getFileData())) {
             PDFRenderer renderer = new PDFRenderer(document);
-            BufferedImage image = renderer.renderImageWithDPI(0, 36);
+            BufferedImage image = renderer.renderImageWithDPI(0, 72);
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ImageIO.write(image, "png", baos);
