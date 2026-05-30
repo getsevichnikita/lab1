@@ -52,9 +52,11 @@ function BooksPage() {
             const response = await axios.get(`${API_URL}/books/${bookId}/cover`, {
                 responseType: "blob"
             });
-            const url = URL.createObjectURL(response.data);
+            const blob = new Blob([response.data], { type: 'image/png' });
+            const url = URL.createObjectURL(blob);
             setCovers(prev => ({ ...prev, [bookId]: url }));
         } catch (error) {
+            console.error("Failed to load cover for book " + bookId, error);
             setCovers(prev => ({ ...prev, [bookId]: null }));
         }
     };

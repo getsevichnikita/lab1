@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import java.util.List;
@@ -24,7 +25,7 @@ public class BookDTOFieldsOwner {
     @Schema(description = "Book title", example = "War and Peace")
     private String title;
 
-    @NotBlank(message = "Book title must not be blank")
+    @NotNull(message = "Book publication year must not be blank")
     @Min(value = 0, message = "This number can't be a year of AD era")
     @Max(value = 2027, message = "This year is not achieved yet")
     @Schema(description = "Publication year", example = "1869")

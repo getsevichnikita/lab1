@@ -20,6 +20,7 @@ public class BookDTO {
     @Schema(description = "Book title", example = "War and Peace")
     private String title;
 
+    @NotNull(message = "Book publication year must not be blank")
     @Min(value = 0, message = "This number can't be a year of AD era")
     @Max(value = 2027, message = "This year is not achieved yet")
     @Schema(description = "Publication year", example = "1869")
