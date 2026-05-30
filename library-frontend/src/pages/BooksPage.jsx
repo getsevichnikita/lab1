@@ -108,30 +108,33 @@ function BooksPage() {
         loadBookStats(book);
     };
 
-    const borrowBook = async (bookId) => {
-        if (!isLoggedIn) {
-            toast.info("Login first");
-            return;
-        }
+   const borrowBook = async (bookId) => {
+       if (!isLoggedIn) {
+           toast.info("Login first");
+           return;
+       }
 
-        const today = new Date();
-        const returnDate = new Date();
-        returnDate.setDate(today.getDate() + 14);
+       const today = new Date();
+       const returnDate = new Date();
+       returnDate.setDate(today.getDate() + 14);
 
-        try {
-            await axios.post(`${API_URL}/loans`, {
-                readerId: Number(readerId),
-                bookId: Number(bookId),
-                issueDate: today.toISOString().split("T")[0],
-                returnDate: returnDate.toISOString().split("T")[0],
-            });
-            toast.success("Book borrowed");
-            if (selectedBook) loadBookStats(selectedBook);
-        } catch (error) {
-            console.error(error);
-            toast.error(error.response?.data?.message || "Cannot borrow book");
-        }
-    };
+       try {
+           await axios.post(`${API_URL}/loans`, {
+               readerId: Number(readerId),
+               bookId: Number(bookId),
+               issueDate: today.toISOString().split("T")[0],
+               returnDate: returnDate.toISOString().split("T")[0],
+           });
+           toast.success("Book borrowed");
+
+           loadBookStats(selectedBook);
+
+           loadData();
+       } catch (error) {
+           console.error(error);
+           toast.error(error.response?.data?.message || "Cannot borrow book");
+       }
+   };
 
     const closeModal = () => {
         setSelectedBook(null);
