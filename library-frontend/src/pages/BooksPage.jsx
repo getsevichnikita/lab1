@@ -237,7 +237,7 @@ function BooksPage() {
                                     disabled={!isLoggedIn || bookStats?.availableCopies === 0}
                                     title={!isLoggedIn ? "Login first" : bookStats?.availableCopies === 0 ? "No copies available" : ""}
                                 >
-                                    {!isLoggedIn ? "Login to Borrow" : bookStats?.availableCopies === 0 ? "Unavailable" : "Borrow"}
+                                    {!isLoggedIn ? "Borrow" : bookStats?.availableCopies === 0 ? "Unavailable" : "Borrow"}
                                 </button>
                                 <button className="borrow-btn" onClick={() => openPdf(selectedBook.id)}>View PDF</button>
                                 <button className="borrow-btn" onClick={() => downloadPdf(selectedBook.id, selectedBook.title)}>Download PDF</button>
