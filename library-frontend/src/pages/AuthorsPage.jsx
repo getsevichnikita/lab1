@@ -42,7 +42,7 @@ function AuthorsPage() {
                 {filtered.map(a => (
                     <div
                         key={a.id}
-                        className="book-card"
+                        className="simple-card"
                         onClick={() => handleAuthorClick(a.name)}
                         role="button"
                         tabIndex={0}

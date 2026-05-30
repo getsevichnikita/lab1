@@ -42,7 +42,7 @@ function CategoriesPage() {
                 {filtered.map(c => (
                     <div
                         key={c.id}
-                        className="book-card"
+                        className="simple-card"
                         onClick={() => handleCategoryClick(c.name)}
                         role="button"
                         tabIndex={0}
