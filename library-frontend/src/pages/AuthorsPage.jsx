@@ -31,7 +31,7 @@ function AuthorsPage() {
         : authors;
 
     const handleAuthorClick = (authorName) => {
-        navigate(`/?author=${encodeURIComponent(authorName)}`);
+        navigate(`/books/?author=${encodeURIComponent(authorName)}`);
     };
 
     return (

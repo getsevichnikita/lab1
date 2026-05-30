@@ -166,6 +166,7 @@ public class BookController {
     })
 
     @GetMapping("/{id}/stats")
+    @Transactional(readOnly = true)
     public ResponseEntity<Map<String, Object>> getBookStats(@PathVariable Long id) {
         Map<String, Object> stats = bookService.getBookStats(id);
         return ResponseEntity.ok(stats);
