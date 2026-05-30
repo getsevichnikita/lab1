@@ -303,7 +303,7 @@ button {
 }
 
 .book-cover img {
-    width: 100%;
+    width: 225px;
     height: 100%;
     object-fit: contain;
     background: #f0e6d2;
