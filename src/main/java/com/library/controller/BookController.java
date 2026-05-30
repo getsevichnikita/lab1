@@ -173,6 +173,7 @@ public class BookController {
     }
 
     @GetMapping("/{id}/cover")
+    @Transactional(readOnly = true)
     public ResponseEntity<byte[]> getCover(@PathVariable Long id) {
         byte[] cover = bookService.getBookCover(id);
         if (cover.length == 0) {
