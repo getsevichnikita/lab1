@@ -111,9 +111,26 @@
   gap: 8px;
   margin: 32px 0 0;
 
-  .logo {
-    height: 18px;
-  }
+.logo {
+    font-size: 28px;
+    font-weight: bold;
+    color: #3b2f1d;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+}
+
+.logo:hover {
+    text-decoration: underline;
+}
+
+.nav-logo {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    vertical-align: middle;
+}
 
   a {
     color: var(--text-h);

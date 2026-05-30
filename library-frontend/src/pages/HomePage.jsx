@@ -6,18 +6,17 @@ const isLoggedIn = !!readerId;
 function HomePage() {
     return (
         <div className="page" style={{ textAlign: "center", paddingTop: "60px" }}>
-            <h1>Welcome to LiberLibrary</h1>
+            <h1>Добро пожаловать в LiberLibrary</h1>
             <p style={{ fontSize: "18px", color: "#666", marginBottom: "40px" }}>
-                Your personal library management system
+                LiberLibrary это свободная библиотека, в которой любой желающий может разместить свою книгу или же заказать чью-то
             </p>
 
             <div style={{ display: "flex", justifyContent: "center", gap: "20px", flexWrap: "wrap" }}>
-                <Link to="/books" className="home-btn">Browse Books</Link>
-                <Link to="/authors" className="home-btn">Authors</Link>
-                <Link to="/categories" className="home-btn">Categories</Link>
-                {!isLoggedIn && <Link to="/login" className="home-btn">Login</Link>}
-                {isLoggedIn && <Link to="/profile" className="home-btn">My Profile</Link>}
-                {isLoggedIn && <Link to="/upload-book" className="home-btn">Upload Book</Link>}
+                <Link to="/books" className="home-btn">Искать Книги</Link>
+                <Link to="/authors" className="home-btn">Авторы</Link>
+                <Link to="/categories">Жанры</Link>
+                <Link to="/upload-book">Опубликовать книгу</Link>
+                <Link to="/profile">Учётная запись</Link>
             </div>
         </div>
     );

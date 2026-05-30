@@ -73,14 +73,14 @@ function ProfilePage({ readerId, readerName, onLogout }) {
       setMyBooks(my);
     } catch (error) {
       console.error(error);
-      toast.error("Failed to load data");
+      toast.error("Не удалось загрузить данные");
     }
   };
 
   const getBookById = (id) => books.find(b => b.id === id);
   const getBookTitle = (id) => {
     const book = books.find(b => b.id === id);
-    return book ? book.title : "Unknown";
+    return book ? book.title : "Неизвестно";
   };
 
   const myLoans = loans.filter(loan => loan?.readerId != null && Number(loan.readerId) === Number(readerId));
@@ -90,10 +90,10 @@ function ProfilePage({ readerId, readerName, onLogout }) {
       await axios.delete(`${API_URL}/loans/${loanId}`);
       setLoans(prev => prev.filter(l => l.id !== loanId));
       resetSelection();
-      toast.success("Loan cancelled");
+      toast.success("Заказ отменён");
     } catch (error) {
       console.error(error);
-      toast.error("Cancel failed");
+      toast.error("Не удалось отменить заказ");
     }
   };
 
@@ -103,10 +103,10 @@ function ProfilePage({ readerId, readerName, onLogout }) {
       setBooks(prev => prev.filter(b => b.id !== id));
       setMyBooks(prev => prev.filter(b => b.id !== id));
       resetSelection();
-      toast.success("Book deleted");
+      toast.success("Книга удалена");
     } catch (error) {
       console.error(error);
-      toast.error("Delete failed");
+      toast.error("Не удалось удалить книгу");
     }
   };
 
@@ -126,7 +126,7 @@ function ProfilePage({ readerId, readerName, onLogout }) {
     const trimmed = newAuthorName.trim();
     if (!trimmed) return;
     if (editAuthors.some(a => a.name.toLowerCase() === trimmed.toLowerCase())) {
-      toast.warn("Author already in the list");
+      toast.warn("Автор уже в списке");
       return;
     }
     setEditAuthors(prev => [...prev, { id: null, name: trimmed }]);
@@ -138,7 +138,7 @@ function ProfilePage({ readerId, readerName, onLogout }) {
     const trimmed = newCategoryName.trim();
     if (!trimmed) return;
     if (editCategories.some(c => c.name.toLowerCase() === trimmed.toLowerCase())) {
-      toast.warn("Category already in the list");
+      toast.warn("Жанр уже в списке");
       return;
     }
     setEditCategories(prev => [...prev, { id: null, name: trimmed }]);
@@ -153,7 +153,7 @@ function ProfilePage({ readerId, readerName, onLogout }) {
       const res = await axios.post(`${API_URL}/${endpoint}`, { name });
       return res.data.id;
     } catch (error) {
-      console.error(`Failed to create ${type}: ${name}`, error);
+      console.error(`Не удалось создать ${type}: ${name}`, error);
       throw error;
     }
   };
@@ -181,10 +181,10 @@ function ProfilePage({ readerId, readerName, onLogout }) {
         formData.append("file", newPdfFile);
         try {
           await axios.put(`${API_URL}/books/${selectedBook.id}/pdf`, formData);
-          toast.success("PDF updated");
+          toast.success("PDF обновлён");
         } catch (pdfError) {
           console.error(pdfError);
-          toast.error("Book saved, but PDF update failed");
+          toast.error("Книга сохранена, но не удалось обновить PDF");
         }
       }
 
@@ -198,10 +198,10 @@ function ProfilePage({ readerId, readerName, onLogout }) {
       setSelectedBook(updatedBook);
       setEditMode(false);
       setNewPdfFile(null);
-      toast.success("Book updated");
+      toast.success("Книга обновлена");
     } catch (error) {
       console.error(error);
-      toast.error("Update failed");
+      toast.error("Не удалось обновить книгу");
     }
   };
 
@@ -219,25 +219,25 @@ function ProfilePage({ readerId, readerName, onLogout }) {
       }
     } catch (error) {
       console.error(error);
-      toast.error("Failed to open PDF");
+      toast.error("Не удалось открыть PDF");
     }
   };
 
   return (
     <div className="page">
       <div className="profile-header">
-        <h1>My Profile — {readerName}</h1>
-        <button className="logout-btn" onClick={handleLogout}>Logout</button>
+        <h1>Мой профиль — {readerName}</h1>
+        <button className="logout-btn" onClick={handleLogout}>Выйти</button>
       </div>
 
       <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-        <button className="borrow-btn" onClick={() => { setActiveTab("loans"); resetSelection(); }}>My Loans</button>
-        <button className="borrow-btn" onClick={() => { setActiveTab("books"); resetSelection(); }}>My Books</button>
+        <button className="borrow-btn" onClick={() => { setActiveTab("loans"); resetSelection(); }}>Мои заказы</button>
+        <button className="borrow-btn" onClick={() => { setActiveTab("books"); resetSelection(); }}>Мои книги</button>
       </div>
 
       {activeTab === "loans" && (
         <>
-          <h2>My Loans</h2>
+          <h2>Мои заказы</h2>
           <div className="books-grid">
             {myLoans.map(loan => (
               <div key={loan.id} className="book-card" onClick={() => { setSelectedLoan(loan); setSelectedBook(getBookById(loan.bookId)); setEditMode(false); }}>
@@ -245,15 +245,15 @@ function ProfilePage({ readerId, readerName, onLogout }) {
                   {covers[loan.bookId] ? (
                     <img src={covers[loan.bookId]} alt={getBookTitle(loan.bookId)} />
                   ) : covers[loan.bookId] === null ? (
-                    <div className="no-cover">No Cover</div>
+                    <div className="no-cover">Без обложки</div>
                   ) : (
-                    <div className="loading-cover">Loading...</div>
+                    <div className="loading-cover">Загрузка...</div>
                   )}
                 </div>
                 <div className="book-info">
                   <h3>{getBookTitle(loan.bookId)}</h3>
-                  <p>Issue: {loan.issueDate}</p>
-                  <p>Return: {loan.returnDate || "not returned"}</p>
+                  <p>Выдана: {loan.issueDate}</p>
+                  <p>Возврат: {loan.returnDate || "не возвращена"}</p>
                 </div>
               </div>
             ))}
@@ -263,7 +263,7 @@ function ProfilePage({ readerId, readerName, onLogout }) {
 
       {activeTab === "books" && (
         <>
-          <h2>My Books</h2>
+          <h2>Мои книги</h2>
           <div className="books-grid">
             {myBooks.map(book => (
               <div key={book.id} className="book-card" onClick={() => { setSelectedBook(book); setSelectedLoan(null); setEditMode(false); }}>
@@ -271,14 +271,14 @@ function ProfilePage({ readerId, readerName, onLogout }) {
                   {covers[book.id] ? (
                     <img src={covers[book.id]} alt={book.title} />
                   ) : covers[book.id] === null ? (
-                    <div className="no-cover">No Cover</div>
+                    <div className="no-cover">Без обложки</div>
                   ) : (
-                    <div className="loading-cover">Loading...</div>
+                    <div className="loading-cover">Загрузка...</div>
                   )}
                 </div>
                 <div className="book-info">
                   <h3>{book.title}</h3>
-                  <p>Year: {book.publicationYear}</p>
+                  <p>Год: {book.publicationYear}</p>
                 </div>
               </div>
             ))}
@@ -290,18 +290,18 @@ function ProfilePage({ readerId, readerName, onLogout }) {
         <div className="modal-overlay" onClick={resetSelection}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>{editMode ? "Edit Book" : selectedBook.title}</h2>
+              <h2>{editMode ? "Редактирование" : selectedBook.title}</h2>
               <button className="close-btn" onClick={resetSelection}>x</button>
             </div>
             <div className="modal-body">
               {editMode ? (
                 <div className="edit-form">
-                  <label>Title:</label>
+                  <label>Название:</label>
                   <input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
-                  <label>Year:</label>
+                  <label>Год:</label>
                   <input type="number" value={editYear} onChange={(e) => setEditYear(e.target.value)} />
                   <div className="form-section">
-                    <label><strong>Authors:</strong></label>
+                    <label><strong>Авторы:</strong></label>
                     <div className="tags-container">
                       {editAuthors.map((author, idx) => (
                         <span key={idx} className="tag">{author.name}
@@ -311,10 +311,10 @@ function ProfilePage({ readerId, readerName, onLogout }) {
                     </div>
                     <input value={newAuthorName} onChange={(e) => setNewAuthorName(e.target.value)}
                       onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addAuthor(); } }}
-                      placeholder="New author name" />
+                      placeholder="Новый автор" />
                   </div>
                   <div className="form-section">
-                    <label><strong>Categories:</strong></label>
+                    <label><strong>Жанры:</strong></label>
                     <div className="tags-container">
                       {editCategories.map((cat, idx) => (
                         <span key={idx} className="tag">{cat.name}
@@ -324,23 +324,23 @@ function ProfilePage({ readerId, readerName, onLogout }) {
                     </div>
                     <input value={newCategoryName} onChange={(e) => setNewCategoryName(e.target.value)}
                       onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addCategory(); } }}
-                      placeholder="New category name" />
+                      placeholder="Новый жанр" />
                   </div>
                   <div className="form-section">
-                    <label><strong>Replace PDF:</strong></label>
+                    <label><strong>Заменить PDF:</strong></label>
                     <input type="file" accept=".pdf" ref={fileInputRef} onChange={(e) => setNewPdfFile(e.target.files[0])} />
                   </div>
                 </div>
               ) : (
                 <>
-                  <p><b>Title:</b> {selectedBook.title}</p>
-                  <p><b>Year:</b> {selectedBook.publicationYear}</p>
-                  <p><b>Authors:</b> {(selectedBook.authors || []).map(a => a.name).join(", ")}</p>
-                  <p><b>Categories:</b> {(selectedBook.categories || []).map(c => c.name).join(", ")}</p>
+                  <p><b>Название:</b> {selectedBook.title}</p>
+                  <p><b>Год:</b> {selectedBook.publicationYear}</p>
+                  <p><b>Авторы:</b> {(selectedBook.authors || []).map(a => a.name).join(", ")}</p>
+                  <p><b>Жанры:</b> {(selectedBook.categories || []).map(c => c.name).join(", ")}</p>
                   {selectedLoan && (
                     <>
-                      <p><b>Issue:</b> {selectedLoan.issueDate}</p>
-                      <p><b>Return:</b> {selectedLoan.returnDate || "not returned"}</p>
+                      <p><b>Выдана:</b> {selectedLoan.issueDate}</p>
+                      <p><b>Возврат:</b> {selectedLoan.returnDate || "не возвращена"}</p>
                     </>
                   )}
                 </>
@@ -348,24 +348,24 @@ function ProfilePage({ readerId, readerName, onLogout }) {
             </div>
             <div className="modal-actions">
               {selectedLoan && !editMode && (
-                <button className="borrow-btn" onClick={() => cancelLoan(selectedLoan.id)}>Cancel Loan</button>
+                <button className="borrow-btn" onClick={() => cancelLoan(selectedLoan.id)}>Отменить заказ</button>
               )}
               {!editMode && (
                 <>
-                  <button className="borrow-btn" onClick={() => openPdf(selectedBook.id, false)}>View PDF</button>
-                  <button className="borrow-btn" onClick={() => openPdf(selectedBook.id, true)}>Download</button>
+                  <button className="borrow-btn" onClick={() => openPdf(selectedBook.id, false)}>Читать</button>
+                  <button className="borrow-btn" onClick={() => openPdf(selectedBook.id, true)}>Скачать</button>
                   {activeTab === "books" && (
                     <>
-                      <button className="borrow-btn" onClick={startEdit}>Edit</button>
-                      <button className="borrow-btn" onClick={() => deleteBook(selectedBook.id)}>Delete</button>
+                      <button className="borrow-btn" onClick={startEdit}>Редактировать</button>
+                      <button className="borrow-btn" onClick={() => deleteBook(selectedBook.id)}>Удалить</button>
                     </>
                   )}
                 </>
               )}
               {editMode && (
                 <>
-                  <button className="borrow-btn" onClick={updateBook}>Save</button>
-                  <button className="borrow-btn" onClick={() => setEditMode(false)}>Close</button>
+                  <button className="borrow-btn" onClick={updateBook}>Сохранить</button>
+                  <button className="borrow-btn" onClick={() => setEditMode(false)}>Закрыть</button>
                 </>
               )}
             </div>

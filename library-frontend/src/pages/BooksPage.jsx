@@ -98,7 +98,7 @@ function BooksPage() {
             const response = await axios.get(`${API_URL}/books/${book.id}/stats`);
             setBookStats(response.data);
         } catch (error) {
-            console.error("Failed to load book stats", error);
+            console.error(error);
             setBookStats({ totalCopies: 0, borrowedCopies: 0, availableCopies: 0 });
         }
     };
@@ -108,33 +108,32 @@ function BooksPage() {
         loadBookStats(book);
     };
 
-   const borrowBook = async (bookId) => {
-       if (!isLoggedIn) {
-           toast.info("Login first");
-           return;
-       }
+    const borrowBook = async (bookId) => {
+        if (!isLoggedIn) {
+            toast.info("Сначала войдите в систему");
+            return;
+        }
 
-       const today = new Date();
-       const returnDate = new Date();
-       returnDate.setDate(today.getDate() + 14);
+        const today = new Date();
+        const returnDate = new Date();
+        returnDate.setDate(today.getDate() + 14);
 
-       try {
-           await axios.post(`${API_URL}/loans`, {
-               readerId: Number(readerId),
-               bookId: Number(bookId),
-               issueDate: today.toISOString().split("T")[0],
-               returnDate: returnDate.toISOString().split("T")[0],
-           });
-           toast.success("Book borrowed");
+        try {
+            await axios.post(`${API_URL}/loans`, {
+                readerId: Number(readerId),
+                bookId: Number(bookId),
+                issueDate: today.toISOString().split("T")[0],
+                returnDate: returnDate.toISOString().split("T")[0],
+            });
+            toast.success("Книга заказана");
 
-           loadBookStats(selectedBook);
-
-           loadData();
-       } catch (error) {
-           console.error(error);
-           toast.error(error.response?.data?.message || "Cannot borrow book");
-       }
-   };
+            loadBookStats(selectedBook);
+            loadData();
+        } catch (error) {
+            console.error(error);
+            toast.error(error.response?.data?.message || "Не удалось заказать книгу");
+        }
+    };
 
     const closeModal = () => {
         setSelectedBook(null);
@@ -154,7 +153,7 @@ function BooksPage() {
             window.open(url, "_blank");
         } catch (error) {
             console.error(error);
-            toast.error("Failed to open PDF");
+            toast.error("Не удалось открыть PDF");
         }
     };
 
@@ -171,20 +170,20 @@ function BooksPage() {
             URL.revokeObjectURL(url);
         } catch (error) {
             console.error(error);
-            toast.error("Failed to download PDF");
+            toast.error("Не удалось скачать PDF");
         }
     };
 
     return (
         <div className="page">
-            <h1>Books</h1>
+            <h1>Книги</h1>
 
             <div className="search-panel">
-                <input placeholder="Title..." value={searchTitle} onChange={(e) => setSearchTitle(e.target.value)} />
-                <input placeholder="Author..." value={searchAuthor} onChange={(e) => setSearchAuthor(e.target.value)} />
-                <input placeholder="Category..." value={searchCategory} onChange={(e) => setSearchCategory(e.target.value)} />
-                <input type="number" placeholder="Year from..." value={yearFrom} onChange={(e) => setYearFrom(e.target.value)} />
-                <input type="number" placeholder="Year to..." value={yearTo} onChange={(e) => setYearTo(e.target.value)} />
+                <input placeholder="Название..." value={searchTitle} onChange={(e) => setSearchTitle(e.target.value)} />
+                <input placeholder="Автор..." value={searchAuthor} onChange={(e) => setSearchAuthor(e.target.value)} />
+                <input placeholder="Жанр..." value={searchCategory} onChange={(e) => setSearchCategory(e.target.value)} />
+                <input type="number" placeholder="Год от..." value={yearFrom} onChange={(e) => setYearFrom(e.target.value)} />
+                <input type="number" placeholder="Год до..." value={yearTo} onChange={(e) => setYearTo(e.target.value)} />
             </div>
 
             <div className="books-grid">
@@ -198,9 +197,9 @@ function BooksPage() {
                             {covers[book.id] ? (
                                 <img src={covers[book.id]} alt={book.title} />
                             ) : covers[book.id] === null ? (
-                                <div className="no-cover">No Cover</div>
+                                <div className="no-cover">Без обложки</div>
                             ) : (
-                                <div className="loading-cover">Loading...</div>
+                                <div className="loading-cover">Загрузка...</div>
                             )}
                         </div>
                         <div className="book-info">
@@ -220,15 +219,15 @@ function BooksPage() {
                         </div>
 
                         <div className="modal-body">
-                            <p><strong>Year:</strong> {selectedBook.publicationYear}</p>
-                            <p><strong>Authors:</strong> {(selectedBook.authors || []).map((a) => a.name).join(", ")}</p>
-                            <p><strong>Categories:</strong> {(selectedBook.categories || []).map((c) => c.name).join(", ")}</p>
+                            <p><strong>Год:</strong> {selectedBook.publicationYear}</p>
+                            <p><strong>Авторы:</strong> {(selectedBook.authors || []).map((a) => a.name).join(", ")}</p>
+                            <p><strong>Жанры:</strong> {(selectedBook.categories || []).map((c) => c.name).join(", ")}</p>
 
                             {bookStats && (
                                 <div className="book-stats">
-                                    <p><strong>Total copies:</strong> {bookStats.totalCopies}</p>
-                                    <p><strong>Borrowed:</strong> {bookStats.borrowedCopies}</p>
-                                    <p><strong>Available:</strong> {bookStats.availableCopies}</p>
+                                    <p><strong>Всего копий:</strong> {bookStats.totalCopies}</p>
+                                    <p><strong>Занято:</strong> {bookStats.borrowedCopies}</p>
+                                    <p><strong>Доступно:</strong> {bookStats.availableCopies}</p>
                                 </div>
                             )}
 
@@ -237,12 +236,12 @@ function BooksPage() {
                                     className={`borrow-btn ${!isLoggedIn || bookStats?.availableCopies === 0 ? 'disabled-btn' : ''}`}
                                     onClick={() => borrowBook(selectedBook.id)}
                                     disabled={!isLoggedIn || bookStats?.availableCopies === 0}
-                                    title={!isLoggedIn ? "Login first" : bookStats?.availableCopies === 0 ? "No copies available" : ""}
+                                    title={!isLoggedIn ? "Сначала войдите в систему" : bookStats?.availableCopies === 0 ? "Нет доступных копий" : ""}
                                 >
-                                    Borrow
+                                    Заказать
                                 </button>
-                                <button className="borrow-btn" onClick={() => openPdf(selectedBook.id)}>View PDF</button>
-                                <button className="borrow-btn" onClick={() => downloadPdf(selectedBook.id, selectedBook.title)}>Download PDF</button>
+                                <button className="borrow-btn" onClick={() => openPdf(selectedBook.id)}>Читать</button>
+                                <button className="borrow-btn" onClick={() => downloadPdf(selectedBook.id, selectedBook.title)}>Скачать</button>
                             </div>
                         </div>
                     </div>

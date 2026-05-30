@@ -20,7 +20,7 @@ function UploadBookPage() {
     const trimmed = name.trim();
     if (!trimmed) return;
     if (selectedAuthors.some(a => a.name.toLowerCase() === trimmed.toLowerCase())) {
-      toast.warn("Author already in the list");
+      toast.warn("Автор уже в списке");
       setAuthorInput("");
       return;
     }
@@ -32,7 +32,7 @@ function UploadBookPage() {
     const trimmed = name.trim();
     if (!trimmed) return;
     if (selectedCategories.some(c => c.name.toLowerCase() === trimmed.toLowerCase())) {
-      toast.warn("Category already in the list");
+      toast.warn("Жанр уже в списке");
       setCategoryInput("");
       return;
     }
@@ -62,35 +62,33 @@ function UploadBookPage() {
 
   const uploadBook = async () => {
     if (!isLoggedIn) {
-      toast.info("Login first");
+      toast.info("Сначала войдите в систему");
       return;
     }
 
-    // Добавляем автора и категорию из поля ввода, если есть
     if (authorInput.trim()) addAuthorFromInput(authorInput.trim());
     if (categoryInput.trim()) addCategoryFromInput(categoryInput.trim());
 
-    // Даём React обновить состояние
     await new Promise(resolve => setTimeout(resolve, 50));
 
     if (!title.trim()) {
-      toast.error("Enter title");
+      toast.error("Введите название");
       return;
     }
     if (!publicationYear) {
-      toast.error("Enter publication year");
+      toast.error("Введите год издания");
       return;
     }
     if (selectedAuthors.length === 0 && !authorInput.trim()) {
-      toast.error("Add at least one author");
+      toast.error("Добавьте хотя бы одного автора");
       return;
     }
     if (selectedCategories.length === 0 && !categoryInput.trim()) {
-      toast.error("Add at least one category");
+      toast.error("Добавьте хотя бы один жанр");
       return;
     }
     if (!pdfFile) {
-      toast.error("Choose PDF file");
+      toast.error("Выберите PDF-файл");
       return;
     }
 
@@ -116,7 +114,7 @@ function UploadBookPage() {
 
       await axios.post(`${API_URL}/books/upload`, formData);
 
-      toast.success("Book uploaded");
+      toast.success("Книга опубликована");
       setTitle("");
       setPublicationYear("");
       setSelectedAuthors([]);
@@ -127,34 +125,34 @@ function UploadBookPage() {
 
     } catch (error) {
       console.error(error);
-      toast.error(error.response?.data?.message || "Upload failed");
+      toast.error(error.response?.data?.message || "Не удалось опубликовать книгу");
     }
   };
 
   return (
     <div className="page">
-      <h1>Upload Book</h1>
+      <h1>Опубликовать книгу</h1>
 
       <div className={`search-panel-vertical ${!isLoggedIn ? 'disabled-panel' : ''}`}>
         <input
-          placeholder="Title..."
+          placeholder="Название..."
           value={title}
           onChange={(e) => isLoggedIn && setTitle(e.target.value)}
           disabled={!isLoggedIn}
-          title={!isLoggedIn ? "You need to login first" : ""}
+          title={!isLoggedIn ? "Сначала войдите в систему" : ""}
         />
 
         <input
           type="number"
-          placeholder="Publication year..."
+          placeholder="Год издания..."
           value={publicationYear}
           onChange={(e) => isLoggedIn && setPublicationYear(e.target.value)}
           disabled={!isLoggedIn}
-          title={!isLoggedIn ? "You need to login first" : ""}
+          title={!isLoggedIn ? "Сначала войдите в систему" : ""}
         />
 
         <input
-          placeholder="Add author (comma or Enter to add)..."
+          placeholder="Добавить автора (запятая или Enter)..."
           value={authorInput}
           onChange={(e) => {
             if (!isLoggedIn) return;
@@ -173,7 +171,7 @@ function UploadBookPage() {
             }
           }}
           disabled={!isLoggedIn}
-          title={!isLoggedIn ? "You need to login first" : ""}
+          title={!isLoggedIn ? "Сначала войдите в систему" : ""}
         />
         <div className="tags-container">
           {selectedAuthors.map(a => (
@@ -187,7 +185,7 @@ function UploadBookPage() {
         </div>
 
         <input
-          placeholder="Add category (comma or Enter to add)..."
+          placeholder="Добавить жанр (запятая или Enter)..."
           value={categoryInput}
           onChange={(e) => {
             if (!isLoggedIn) return;
@@ -206,7 +204,7 @@ function UploadBookPage() {
             }
           }}
           disabled={!isLoggedIn}
-          title={!isLoggedIn ? "You need to login first" : ""}
+          title={!isLoggedIn ? "Сначала войдите в систему" : ""}
         />
         <div className="tags-container">
           {selectedCategories.map(c => (
@@ -224,17 +222,17 @@ function UploadBookPage() {
           accept="application/pdf"
           onChange={(e) => isLoggedIn && setPdfFile(e.target.files[0])}
           disabled={!isLoggedIn}
-          title={!isLoggedIn ? "You need to login first" : ""}
+          title={!isLoggedIn ? "Сначала войдите в систему" : ""}
         />
 
-     <button
-       className={`borrow-btn ${!isLoggedIn ? 'disabled-btn' : ''}`}
-       onClick={uploadBook}
-       disabled={!isLoggedIn}
-       title={!isLoggedIn ? "You need to login first" : "Upload book to library"}
-     >
-       Upload
-     </button>
+        <button
+          className={`borrow-btn ${!isLoggedIn ? 'disabled-btn' : ''}`}
+          onClick={uploadBook}
+          disabled={!isLoggedIn}
+          title={!isLoggedIn ? "Сначала войдите в систему" : "Опубликовать книгу"}
+        >
+          Опубликовать
+        </button>
       </div>
     </div>
   );

@@ -12,7 +12,7 @@ function LoginPage({ onLogin }) {
 
     const handleAuth = async () => {
         if (!name || !password) {
-            toast.warning("Please enter both name and password");
+            toast.warning("Введите имя и пароль");
             return;
         }
 
@@ -24,15 +24,15 @@ function LoginPage({ onLogin }) {
                     name: name,
                     password
                 });
-                toast.success(`Welcome back, ${name}!`);
+                toast.success(`С возвращением, ${name}!`);
             } catch (e) {
                 if (e.response?.status === 401 || e.response?.status === 404) {
-                    toast.info("Account not found, creating new one...");
+                    toast.info("Аккаунт не найден, создаём новый...");
                     res = await axios.post(`${API_URL}/auth/register`, {
                         name: name,
                         password
                     });
-                    toast.success(`Account created! Welcome, ${name}!`);
+                    toast.success(`Аккаунт создан! Добро пожаловать, ${name}!`);
                 } else {
                     throw e;
                 }
@@ -45,32 +45,32 @@ function LoginPage({ onLogin }) {
             console.error(error);
 
             if (error.response?.status === 401) {
-                toast.error("Invalid password. Please try again.");
+                toast.error("Неверный пароль. Попробуйте ещё раз.");
             } else if (error.response?.status === 409) {
-                toast.error("User with this name already exists.");
+                toast.error("Пользователь с таким именем уже существует.");
             } else if (error.response?.status === 500) {
-                toast.error("Server error. Please try again later.");
-            } else if (error.response==null) {
-                toast.error("Cannot connect to server. Check your internet connection.");
+                toast.error("Ошибка сервера. Попробуйте позже.");
+            } else if (error.response == null) {
+                toast.error("Нет соединения с сервером. Проверьте интернет.");
             } else {
-                toast.error(error.response?.data?.message || "Authentication failed");
+                toast.error(error.response?.data?.message || "Ошибка авторизации");
             }
         }
     };
 
     return (
         <div className="page">
-            <h1>Library Login</h1>
+            <h1>Вход в библиотеку</h1>
 
             <div className="search-panel">
                 <input
-                    placeholder="Name"
+                    placeholder="Имя"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                 />
 
                 <input
-                    placeholder="Password"
+                    placeholder="Пароль"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -80,7 +80,7 @@ function LoginPage({ onLogin }) {
                 />
 
                 <button className="borrow-btn" onClick={handleAuth}>
-                    Register / Login
+                    Войти / Зарегистрироваться
                 </button>
             </div>
         </div>
