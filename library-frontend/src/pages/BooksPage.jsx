@@ -202,8 +202,7 @@ function BooksPage() {
                         </div>
                         <div className="book-info">
                             <h2>{book.title}</h2>
-                            <p><strong>Year:</strong> {book.publicationYear}</p>
-                            <p><strong>Authors:</strong> {(book.authors || []).map((a) => a.name).join(", ")}</p>
+                            <p>{(book.authors || []).map((a) => a.name).join(", ")}</p>
                         </div>
                     </div>
                 ))}
