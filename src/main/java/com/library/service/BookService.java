@@ -352,6 +352,7 @@ public class BookService {
         );
     }
 
+    @Transactional(readOnly = true)
     public byte[] getBookCover(Long bookId) {
         BookPDF pdf = bookPDFRepository.findByBookId(bookId).orElse(null);
         if (pdf == null || pdf.getFileData() == null) {
