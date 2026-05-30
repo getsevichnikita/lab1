@@ -41,64 +41,81 @@ function UploadBookPage() {
   };
 
   const uploadBook = async () => {
-    if (!isLoggedIn) {
-      toast.info("Login first");
-      return;
-    }
+      if (!isLoggedIn) {
+        toast.info("Login first");
+        return;
+      }
 
-    if (!title.trim()) {
-      toast.error("Enter title");
-      return;
-    }
-    if (!publicationYear) {
-      toast.error("Enter publication year");
-      return;
-    }
-    if (selectedAuthors.length === 0) {
-      toast.error("Add at least one author");
-      return;
-    }
-    if (selectedCategories.length === 0) {
-      toast.error("Add at least one category");
-      return;
-    }
-    if (!pdfFile) {
-      toast.error("Choose PDF file");
-      return;
-    }
+      if (authorInput.trim()) {
+        addAuthorFromInput(authorInput.trim());
+      }
 
-    try {
-      const bookDto = {
-        title,
-        publicationYear: Number(publicationYear),
-        authors: selectedAuthors.map(a => ({ name: a.name })),
-        categories: selectedCategories.map(c => ({ name: c.name })),
-        ownerId: Number(readerId),
-      };
+      if (categoryInput.trim()) {
+        addCategoryFromInput(categoryInput.trim());
+      }
 
-      const formData = new FormData();
-      formData.append(
-        "book",
-        new Blob([JSON.stringify(bookDto)], { type: "application/json" })
-      );
-      formData.append("file", pdfFile);
+      await new Promise(resolve => setTimeout(resolve, 50));
 
-      await axios.post(`${API_URL}/books/upload`, formData);
+      if (!title.trim()) {
+        toast.error("Enter title");
+        return;
+      }
+      if (!publicationYear) {
+        toast.error("Enter publication year");
+        return;
+      }
+      if (selectedAuthors.length === 0 && !authorInput.trim()) {
+        toast.error("Add at least one author");
+        return;
+      }
+      if (selectedCategories.length === 0 && !categoryInput.trim()) {
+        toast.error("Add at least one category");
+        return;
+      }
+      if (!pdfFile) {
+        toast.error("Choose PDF file");
+        return;
+      }
 
-      toast.success("Book uploaded");
+      try {
+        const finalAuthors = authorInput.trim()
+          ? [...selectedAuthors, { id: Date.now(), name: authorInput.trim() }]
+          : selectedAuthors;
+        const finalCategories = categoryInput.trim()
+          ? [...selectedCategories, { id: Date.now(), name: categoryInput.trim() }]
+          : selectedCategories;
 
-      // Очистка формы
-      setTitle("");
-      setPublicationYear("");
-      setSelectedAuthors([]);
-      setSelectedCategories([]);
-      setPdfFile(null);
+        const bookDto = {
+          title,
+          publicationYear: Number(publicationYear),
+          authors: finalAuthors.map(a => ({ name: a.name })),
+          categories: finalCategories.map(c => ({ name: c.name })),
+          ownerId: Number(readerId),
+        };
 
-    } catch (error) {
-      console.error(error);
-      toast.error(error.response?.data?.message || "Upload failed");
-    }
-  };
+        const formData = new FormData();
+        formData.append(
+          "book",
+          new Blob([JSON.stringify(bookDto)], { type: "application/json" })
+        );
+        formData.append("file", pdfFile);
+
+        await axios.post(`${API_URL}/books/upload`, formData);
+
+        toast.success("Book uploaded");
+        setTitle("");
+        setPublicationYear("");
+        setSelectedAuthors([]);
+        setSelectedCategories([]);
+        setAuthorInput("");
+        setCategoryInput("");
+        setPdfFile(null);
+
+      } catch (error) {
+        console.error(error);
+        toast.error(error.response?.data?.message || "Upload failed");
+      }
+    };
 
   return (
     <div className="page">
