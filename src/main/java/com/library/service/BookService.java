@@ -7,6 +7,7 @@ import com.library.model.dto.BookDTOFields;
 import com.library.model.dto.BookDTOFieldsOwner;
 import com.library.model.entity.BookPDF;
 import com.library.repository.BookPDFRepository;
+import com.library.repository.LoanRepository;
 import lombok.extern.slf4j.Slf4j;
 import com.library.mapper.BookMapper;
 import com.library.model.entity.Author;
@@ -26,13 +27,18 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class BookService {
+    private final LoanRepository loanRepository;
     private final BookPDFRepository bookPDFRepository;
     private static final String LOG_BOOK_NOT_FOUND = "Book not found with id = ";
     private final BookRepository bookRepository;
@@ -286,6 +292,58 @@ public class BookService {
         }
 
         return name;
+    }
+
+    public Map<String, Object> getBookStats(Long bookId) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new ResourceNotFoundException("Book not found"));
+
+        List<Book> allBooks = bookRepository.findAll();
+
+        BookPDF currentPdf = bookPDFRepository.findByBookId(bookId).orElse(null);
+        byte[] currentPdfData = currentPdf != null ? currentPdf.getFileData() : null;
+
+        Set<Long> currentAuthorIds = book.getAuthors().stream()
+                .map(Author::getId)
+                .collect(Collectors.toSet());
+
+        Set<Long> currentCategoryIds = book.getCategories().stream()
+                .map(Category::getId)
+                .collect(Collectors.toSet());
+
+        List<Book> sameBooks = allBooks.stream()
+                .filter(b -> b.getTitle().equals(book.getTitle()))
+                .filter(b -> b.getPublicationYear() == book.getPublicationYear())
+                .filter(b -> {
+                    Set<Long> otherAuthorIds = b.getAuthors().stream()
+                            .map(Author::getId)
+                            .collect(Collectors.toSet());
+                    return otherAuthorIds.equals(currentAuthorIds);
+                })
+                .filter(b -> {
+                    Set<Long> otherCategoryIds = b.getCategories().stream()
+                            .map(Category::getId)
+                            .collect(Collectors.toSet());
+                    return otherCategoryIds.equals(currentCategoryIds);
+                })
+                .filter(b -> {
+                    BookPDF otherPdf = bookPDFRepository.findByBookId(b.getId()).orElse(null);
+                    byte[] otherPdfData = otherPdf != null ? otherPdf.getFileData() : null;
+                    return Arrays.equals(currentPdfData, otherPdfData);
+                })
+                .toList();
+
+        long totalCopies = sameBooks.size();
+        long borrowedCopies = sameBooks.stream()
+                .mapToLong(b -> loanRepository.countByBookIdAndReturnDateIsNull(b.getId()))
+                .sum();
+        long availableCopies = totalCopies - borrowedCopies;
+
+        return Map.of(
+                "totalCopies", totalCopies,
+                "borrowedCopies", borrowedCopies,
+                "availableCopies", availableCopies
+        );
     }
 
     private void invalidateCache() {

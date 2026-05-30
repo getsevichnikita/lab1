@@ -16,4 +16,6 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
             Long bookId,
             LocalDate date
     );
+
+    long countByBookIdAndReturnDateIsNull(Long bookId);
 }

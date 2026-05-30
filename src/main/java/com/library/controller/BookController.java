@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/books")
@@ -157,5 +158,16 @@ public class BookController {
                                             @RequestParam("file") MultipartFile file) {
         bookService.updatePdf(id, file);
         return ResponseEntity.ok("PDF updated");
+    }
+    @Operation(summary = "Get book statistics")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Statistics retrieved"),
+            @ApiResponse(responseCode = "404", description = "Book not found")
+    })
+
+    @GetMapping("/{id}/stats")
+    public ResponseEntity<Map<String, Object>> getBookStats(@PathVariable Long id) {
+        Map<String, Object> stats = bookService.getBookStats(id);
+        return ResponseEntity.ok(stats);
     }
 }

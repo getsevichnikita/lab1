@@ -3,12 +3,14 @@ import { useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { getBooks } from "../services/bookService";
+
 const API_URL = "https://library-api-v8wu.onrender.com";
 
 function BooksPage() {
     const [pdfUrl, setPdfUrl] = useState(null);
     const [books, setBooks] = useState([]);
     const [selectedBook, setSelectedBook] = useState(null);
+    const [bookStats, setBookStats] = useState(null);
 
     const [searchTitle, setSearchTitle] = useState("");
     const [searchAuthor, setSearchAuthor] = useState("");
@@ -21,6 +23,9 @@ function BooksPage() {
     const authorFilter = params.get("author") || "";
     const categoryFilter = params.get("category") || "";
 
+    const readerId = localStorage.getItem("readerId");
+    const isLoggedIn = !!readerId;
+
     useEffect(() => {
         loadData();
     }, []);
@@ -28,67 +33,63 @@ function BooksPage() {
     const loadData = async () => {
         try {
             const booksData = await getBooks();
-            setBooks(Array.isArray(booksData) ? booksData : []);
+            const allBooks = Array.isArray(booksData) ? booksData : (booksData.content || []);
+            const grouped = groupBooks(allBooks);
+            setBooks(grouped);
         } catch (error) {
             console.error(error);
         }
     };
 
+    // Группировка одинаковых книг
+    const groupBooks = (booksList) => {
+        const map = new Map();
+        booksList.forEach(book => {
+            const authorNames = (book.authors || []).map(a => a.name).sort().join(",");
+            const categoryNames = (book.categories || []).map(c => c.name).sort().join(",");
+            const key = `${book.title}|${book.publicationYear}|${authorNames}|${categoryNames}`;
+
+            if (map.has(key)) {
+                const existing = map.get(key);
+                existing.count++;
+                existing.ids.push(book.id);
+            } else {
+                map.set(key, { ...book, count: 1, ids: [book.id] });
+            }
+        });
+        return Array.from(map.values());
+    };
 
     const filteredBooks = (books || []).filter((book) => {
-        const authorNames = (book.authors || []).map((a) =>
-            a.name.toLowerCase()
-        );
-        const categoryNames = (book.categories || []).map((c) =>
-            c.name.toLowerCase()
-        );
+        const authorNames = (book.authors || []).map((a) => a.name.toLowerCase());
+        const categoryNames = (book.categories || []).map((c) => c.name.toLowerCase());
 
-        const matchesTitle =
-            !searchTitle ||
-            book.title?.toLowerCase().includes(searchTitle.toLowerCase());
+        const matchesTitle = !searchTitle || book.title?.toLowerCase().includes(searchTitle.toLowerCase());
+        const matchesAuthor = !searchAuthor || authorNames.some((name) => name.includes(searchAuthor.toLowerCase()));
+        const matchesCategory = !searchCategory || categoryNames.some((name) => name.includes(searchCategory.toLowerCase()));
+        const matchesYearFrom = !yearFrom || book.publicationYear >= Number(yearFrom);
+        const matchesYearTo = !yearTo || book.publicationYear <= Number(yearTo);
+        const matchesUrlAuthor = !authorFilter || authorNames.some((name) => name.includes(authorFilter.toLowerCase()));
+        const matchesUrlCategory = !categoryFilter || categoryNames.some((name) => name.includes(categoryFilter.toLowerCase()));
 
-        const matchesAuthor =
-            !searchAuthor ||
-            authorNames.some((name) => name.includes(searchAuthor.toLowerCase()));
-
-        const matchesCategory =
-            !searchCategory ||
-            categoryNames.some((name) =>
-                name.includes(searchCategory.toLowerCase())
-            );
-
-        const matchesYearFrom =
-            !yearFrom || book.publicationYear >= Number(yearFrom);
-
-        const matchesYearTo =
-            !yearTo || book.publicationYear <= Number(yearTo);
-
-        const matchesUrlAuthor =
-            !authorFilter ||
-            authorNames.some((name) =>
-                name.includes(authorFilter.toLowerCase())
-            );
-
-        const matchesUrlCategory =
-            !categoryFilter ||
-            categoryNames.some((name) =>
-                name.includes(categoryFilter.toLowerCase())
-            );
-
-        return (
-            matchesTitle &&
-            matchesAuthor &&
-            matchesCategory &&
-            matchesYearFrom &&
-            matchesYearTo &&
-            matchesUrlAuthor &&
-            matchesUrlCategory
-        );
+        return matchesTitle && matchesAuthor && matchesCategory && matchesYearFrom && matchesYearTo && matchesUrlAuthor && matchesUrlCategory;
     });
 
+    const openBookDetails = async (book) => {
+        setSelectedBook(book);
+        setBookStats(null);
+
+        try {
+            const response = await axios.get(`${API_URL}/books/${book.id}/stats`);
+            setBookStats(response.data);
+        } catch (error) {
+            console.error("Failed to load book stats", error);
+            setBookStats({ totalCopies: 1, borrowedCopies: 0, availableCopies: 1 });
+        }
+    };
+
     const borrowBook = async (bookId) => {
-        const readerId = localStorage.getItem("readerId");
-        if (!readerId) {
+        if (!isLoggedIn) {
             toast.info("Login first");
             return;
         }
@@ -105,16 +106,17 @@ function BooksPage() {
                 returnDate: returnDate.toISOString().split("T")[0],
             });
             toast.success("Book borrowed");
+            // Обновить статистику
+            if (selectedBook) openBookDetails(selectedBook);
         } catch (error) {
             console.error(error);
-            toast.error(
-                error.response?.data?.message || "Cannot borrow book"
-            );
+            toast.error(error.response?.data?.message || "Cannot borrow book");
         }
     };
 
     const closeModal = () => {
         setSelectedBook(null);
+        setBookStats(null);
         if (pdfUrl) {
             URL.revokeObjectURL(pdfUrl);
             setPdfUrl(null);
@@ -123,31 +125,32 @@ function BooksPage() {
 
     const openPdf = async (bookId) => {
         try {
-        const blob = await axios
-            .get(`${API_URL}/books/${bookId}/pdf`, {
-                responseType: "blob",
-            })
-            .then((res) => res.data);
-        const url = window.URL.createObjectURL(blob);
-        window.open(url, "_blank");
+            const blob = await axios
+                .get(`${API_URL}/books/${bookId}/pdf`, { responseType: "blob" })
+                .then((res) => res.data);
+            const url = window.URL.createObjectURL(blob);
+            window.open(url, "_blank");
         } catch (error) {
-              console.error(error);
-              toast.error("Failed to open PDF");
-            }
+            console.error(error);
+            toast.error("Failed to open PDF");
+        }
     };
 
     const downloadPdf = async (bookId, title) => {
-        const blob = await axios
-            .get(`${API_URL}/books/${bookId}/pdf`, {
-                responseType: "blob",
-            })
-            .then((res) => res.data);
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${title}.pdf`;
-        a.click();
-        URL.revokeObjectURL(url);
+        try {
+            const blob = await axios
+                .get(`${API_URL}/books/${bookId}/pdf`, { responseType: "blob" })
+                .then((res) => res.data);
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `${title}.pdf`;
+            a.click();
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to download PDF");
+        }
     };
 
     return (
@@ -155,33 +158,11 @@ function BooksPage() {
             <h1>Books</h1>
 
             <div className="search-panel">
-                <input
-                    placeholder="Title..."
-                    value={searchTitle}
-                    onChange={(e) => setSearchTitle(e.target.value)}
-                />
-                <input
-                    placeholder="Author..."
-                    value={searchAuthor}
-                    onChange={(e) => setSearchAuthor(e.target.value)}
-                />
-                <input
-                    placeholder="Category..."
-                    value={searchCategory}
-                    onChange={(e) => setSearchCategory(e.target.value)}
-                />
-                <input
-                    type="number"
-                    placeholder="Year from..."
-                    value={yearFrom}
-                    onChange={(e) => setYearFrom(e.target.value)}
-                />
-                <input
-                    type="number"
-                    placeholder="Year to..."
-                    value={yearTo}
-                    onChange={(e) => setYearTo(e.target.value)}
-                />
+                <input placeholder="Title..." value={searchTitle} onChange={(e) => setSearchTitle(e.target.value)} />
+                <input placeholder="Author..." value={searchAuthor} onChange={(e) => setSearchAuthor(e.target.value)} />
+                <input placeholder="Category..." value={searchCategory} onChange={(e) => setSearchCategory(e.target.value)} />
+                <input type="number" placeholder="Year from..." value={yearFrom} onChange={(e) => setYearFrom(e.target.value)} />
+                <input type="number" placeholder="Year to..." value={yearTo} onChange={(e) => setYearTo(e.target.value)} />
             </div>
 
             <div className="books-grid">
@@ -189,85 +170,51 @@ function BooksPage() {
                     <div
                         key={book.id}
                         className="book-card"
-                        onClick={() => setSelectedBook(book)}
+                        onClick={() => openBookDetails(book)}
                     >
                         <h2>{book.title}</h2>
-                        <p>
-                            <strong>Year:</strong> {book.publicationYear}
-                        </p>
-                        <p>
-                            <strong>Authors:</strong>{" "}
-                            {(book.authors || [])
-                                .map((a) => a.name)
-                                .join(", ")}
-                        </p>
-                        <p>
-                            <strong>Categories:</strong>{" "}
-                            {(book.categories || [])
-                                .map((c) => c.name)
-                                .join(", ")}
-                        </p>
+                        <p><strong>Year:</strong> {book.publicationYear}</p>
+                        <p><strong>Authors:</strong> {(book.authors || []).map((a) => a.name).join(", ")}</p>
+                        <p><strong>Categories:</strong> {(book.categories || []).map((c) => c.name).join(", ")}</p>
+                        {book.count > 1 && (
+                            <p className="copy-count">📚 {book.count} copies</p>
+                        )}
                     </div>
                 ))}
             </div>
 
             {selectedBook && (
                 <div className="modal-overlay" onClick={closeModal}>
-                    <div
-                        className="modal"
-                        onClick={(e) => e.stopPropagation()}
-                    >
+                    <div className="modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
                             <h2>{selectedBook.title}</h2>
-                            <button className="close-btn" onClick={closeModal}>
-                                ✕
-                            </button>
+                            <button className="close-btn" onClick={closeModal}>×</button>
                         </div>
 
                         <div className="modal-body">
-                            <p>
-                                <strong>Year:</strong>{" "}
-                                {selectedBook.publicationYear}
-                            </p>
-                            <p>
-                                <strong>Authors:</strong>{" "}
-                                {(selectedBook.authors || [])
-                                    .map((a) => a.name)
-                                    .join(", ")}
-                            </p>
-                            <p>
-                                <strong>Categories:</strong>{" "}
-                                {(selectedBook.categories || [])
-                                    .map((c) => c.name)
-                                    .join(", ")}
-                            </p>
+                            <p><strong>Year:</strong> {selectedBook.publicationYear}</p>
+                            <p><strong>Authors:</strong> {(selectedBook.authors || []).map((a) => a.name).join(", ")}</p>
+                            <p><strong>Categories:</strong> {(selectedBook.categories || []).map((c) => c.name).join(", ")}</p>
+
+                            {bookStats && (
+                                <div className="book-stats">
+                                    <p>📚 <strong>Total copies:</strong> {bookStats.totalCopies}</p>
+                                    <p>📖 <strong>Borrowed:</strong> {bookStats.borrowedCopies}</p>
+                                    <p>✅ <strong>Available:</strong> {bookStats.availableCopies}</p>
+                                </div>
+                            )}
 
                             <div className="modal-actions">
                                 <button
-                                    className="borrow-btn"
-                                    onClick={() =>
-                                        borrowBook(selectedBook.id)
-                                    }
+                                    className={`borrow-btn ${!isLoggedIn || bookStats?.availableCopies === 0 ? 'disabled-btn' : ''}`}
+                                    onClick={() => borrowBook(selectedBook.id)}
+                                    disabled={!isLoggedIn || bookStats?.availableCopies === 0}
+                                    title={!isLoggedIn ? "Login first" : bookStats?.availableCopies === 0 ? "No copies available" : ""}
                                 >
-                                    Borrow
+                                    {!isLoggedIn ? "🔒 Borrow" : bookStats?.availableCopies === 0 ? "Unavailable" : "Borrow"}
                                 </button>
-                                <button
-                                    className="borrow-btn"
-                                    onClick={() => openPdf(selectedBook.id)}
-                                >
-                                    View PDF
-                                </button>
-                                <button
-                                    className="borrow-btn"
-                                    onClick={() =>
-                                        downloadPdf(
-                                            selectedBook.id,
-                                            selectedBook.title
-                                        )
-                                    }
-                                >
-                                    Download PDF
-                                </button>
+                                <button className="borrow-btn" onClick={() => openPdf(selectedBook.id)}>View PDF</button>
+                                <button className="borrow-btn" onClick={() => downloadPdf(selectedBook.id, selectedBook.title)}>Download PDF</button>
                             </div>
                         </div>
                     </div>
