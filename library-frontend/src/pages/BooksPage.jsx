@@ -41,7 +41,6 @@ function BooksPage() {
         }
     };
 
-    // Группировка одинаковых книг
     const groupBooks = (booksList) => {
         const map = new Map();
         booksList.forEach(book => {
