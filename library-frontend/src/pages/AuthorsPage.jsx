@@ -36,7 +36,7 @@ function AuthorsPage() {
 
     return (
         <div className="page">
-            <h1>Authors</h1>
+            <h1>Авторы</h1>
 
             <div className="books-grid">
                 {filtered.map(a => (

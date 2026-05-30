@@ -36,7 +36,7 @@ function CategoriesPage() {
 
     return (
         <div className="page">
-            <h1>Categories</h1>
+            <h1>Жанры</h1>
 
             <div className="books-grid">
                 {filtered.map(c => (

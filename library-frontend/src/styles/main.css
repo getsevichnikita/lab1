@@ -389,6 +389,7 @@ button {
 .home-btn {
     padding: 16px 32px;
     background-color: #a58b5e;
+    color: black;
     text-decoration: none;
     border-radius: 8px;
     font-size: 18px;
