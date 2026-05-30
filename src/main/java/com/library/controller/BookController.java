@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -134,6 +135,7 @@ public class BookController {
         return bookService.uploadBook(bookDto, file);
     }
 
+    @Transactional(readOnly = true)
     @GetMapping("/{id}/pdf")
     public ResponseEntity<Resource> getPdf(@PathVariable Long id) {
         BookPDF pdf = bookPDFRepository.findByBookId(id)
@@ -149,6 +151,7 @@ public class BookController {
                 .body(resource);
     }
 
+    @Transactional
     @PutMapping("/{id}/pdf")
     public ResponseEntity<String> updatePdf(@PathVariable Long id,
                                             @RequestParam("file") MultipartFile file) {
