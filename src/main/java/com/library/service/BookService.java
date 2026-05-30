@@ -115,7 +115,6 @@ public class BookService {
     }
 
     public void delete(Long id) {
-
         Book book = bookRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
