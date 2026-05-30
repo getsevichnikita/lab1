@@ -389,7 +389,6 @@ button {
 .home-btn {
     padding: 16px 32px;
     background-color: #a58b5e;
-    color: white;
     text-decoration: none;
     border-radius: 8px;
     font-size: 18px;
@@ -399,4 +398,12 @@ button {
 .home-btn:hover {
     background-color: #8c744d;
     transform: translateY(-2px);
+}
+
+
+
+.nav-logo {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
 }
