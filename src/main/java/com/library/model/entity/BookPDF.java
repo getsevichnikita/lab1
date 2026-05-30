@@ -19,7 +19,9 @@ public class BookPDF {
 
     private String fileName;
 
-    private String filePath;
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    private byte[] fileData;
 
     private LocalDateTime uploadedAt;
 

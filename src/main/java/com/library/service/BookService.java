@@ -24,14 +24,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -127,19 +123,8 @@ public class BookService {
                         )
                 );
 
-        BookPDF pdf = bookPDFRepository.findByBookId(id)
-                .orElse(null);
-
-        if (pdf != null) {
-            try {
-                Path path = Paths.get(pdf.getFilePath());
-                Files.deleteIfExists(path);
-            } catch (IOException e) {
-                log.warn("Failed to delete file: {}", pdf.getFilePath());
-            }
-
-            bookPDFRepository.delete(pdf);
-        }
+        bookPDFRepository.findByBookId(id)
+                .ifPresent(bookPDFRepository::delete);
 
         for (Author author : new ArrayList<>(book.getAuthors())) {
             author.getBooks().remove(book);
@@ -221,27 +206,7 @@ public class BookService {
         }
 
         try {
-            String uploadDir = "uploads/";
-            File dir = new File(uploadDir);
-
-            if (!dir.exists()) {
-                boolean created = dir.mkdirs();
-                if (!created) {
-                    throw new RuntimeException("Failed to create upload directory");
-                }
-            }
-
             String safeFilename = extractSafeFilename(file.getOriginalFilename());
-            String fileName = UUID.randomUUID() + "_" + safeFilename;
-
-            Path uploadPath = Paths.get(uploadDir).toAbsolutePath();
-            Path path = uploadPath.resolve(fileName).normalize();
-
-            if (!path.startsWith(uploadPath)) {
-                throw new SecurityException("Invalid file path");
-            }
-
-            Files.write(path, file.getBytes());
 
             Book book = new Book();
             book.setTitle(dto.getTitle());
@@ -277,8 +242,8 @@ public class BookService {
 
             BookPDF pdf = new BookPDF();
             pdf.setBook(savedBook);
-            pdf.setFilePath(path.toString());
             pdf.setFileName(safeFilename);
+            pdf.setFileData(file.getBytes());
             pdf.setUploadedAt(LocalDateTime.now());
             pdf.setOwnerId(dto.getOwnerId());
             bookPDFRepository.save(pdf);
@@ -297,28 +262,17 @@ public class BookService {
         BookPDF pdf = bookPDFRepository.findByBookId(bookId)
                 .orElse(new BookPDF());
 
-        String uploadDir = "uploads/";
         String safeFilename = extractSafeFilename(file.getOriginalFilename());
-        String fileName = UUID.randomUUID() + "_" + safeFilename;
-
-        Path uploadPath = Paths.get(uploadDir).toAbsolutePath();
-        Path path = uploadPath.resolve(fileName).normalize();
-
-        if (!path.startsWith(uploadPath)) {
-            throw new SecurityException("Invalid file path");
-        }
 
         try {
-            Files.write(path, file.getBytes());
+            pdf.setBook(book);
+            pdf.setFileData(file.getBytes());
+            pdf.setFileName(safeFilename);
+            pdf.setUploadedAt(LocalDateTime.now());
+            bookPDFRepository.save(pdf);
         } catch (IOException e) {
             throw new RuntimeException("Failed to store file", e);
         }
-
-        pdf.setBook(book);
-        pdf.setFilePath(path.toString());
-        pdf.setFileName(safeFilename);
-        pdf.setUploadedAt(LocalDateTime.now());
-        bookPDFRepository.save(pdf);
     }
 
     private String extractSafeFilename(String originalFilename) {

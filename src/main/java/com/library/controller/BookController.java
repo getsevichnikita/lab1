@@ -13,10 +13,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -24,8 +24,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 @RestController
@@ -131,39 +129,26 @@ public class BookController {
 
     @PostMapping("/upload")
     public BookDTO uploadBook(
-
-            @RequestPart("book")
-            BookDTOFieldsOwner bookDto,
-
-            @RequestPart("file")
-            MultipartFile file
-    ) {
-
+            @RequestPart("book") BookDTOFieldsOwner bookDto,
+            @RequestPart("file") MultipartFile file) {
         return bookService.uploadBook(bookDto, file);
     }
-    @GetMapping("/{id}/pdf")
-    public ResponseEntity<Resource> getPdf(
-            @PathVariable Long id,
-            @RequestParam(defaultValue = "inline") String mode
-    ) {
 
+    @GetMapping("/{id}/pdf")
+    public ResponseEntity<Resource> getPdf(@PathVariable Long id) {
         BookPDF pdf = bookPDFRepository.findByBookId(id)
                 .orElseThrow(() -> new ResourceNotFoundException("PDF not found"));
 
-        Path path = Paths.get(pdf.getFilePath());
-
-        Resource resource = new FileSystemResource(path);
-
-        String disposition = mode.equals("download")
-                ? "attachment"
-                : "inline";
+        byte[] data = pdf.getFileData();
+        ByteArrayResource resource = new ByteArrayResource(data);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
-                        disposition + "; filename=\"" + path.getFileName    () + "\"")
+                        "inline; filename=\"" + pdf.getFileName() + "\"")
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(resource);
     }
+
     @PutMapping("/{id}/pdf")
     public ResponseEntity<String> updatePdf(@PathVariable Long id,
                                             @RequestParam("file") MultipartFile file) {
