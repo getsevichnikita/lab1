@@ -1,10 +1,8 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getCategories } from "../services/categoryService";
-import { toast } from "react-toastify";
 
 function CategoriesPage() {
-
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -32,9 +30,12 @@ function CategoriesPage() {
         )
         : categories;
 
+    const handleCategoryClick = (categoryName) => {
+        navigate(`/?category=${encodeURIComponent(categoryName)}`);
+    };
+
     return (
         <div className="page">
-
             <h1>Categories</h1>
 
             <div className="books-grid">
@@ -42,16 +43,15 @@ function CategoriesPage() {
                     <div
                         key={c.id}
                         className="book-card"
-                        onClick={() =>
-                            navigate(`/?category=${c.name}`)
-                        }
-                        style={{ cursor: "pointer" }}
+                        onClick={() => handleCategoryClick(c.name)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleCategoryClick(c.name); }}
                     >
                         {c.name}
                     </div>
                 ))}
             </div>
-
         </div>
     );
 }

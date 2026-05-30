@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { getAuthors } from "../services/authorService";
 
 function AuthorsPage() {
-
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -31,9 +30,12 @@ function AuthorsPage() {
         )
         : authors;
 
+    const handleAuthorClick = (authorName) => {
+        navigate(`/?author=${encodeURIComponent(authorName)}`);
+    };
+
     return (
         <div className="page">
-
             <h1>Authors</h1>
 
             <div className="books-grid">
@@ -41,16 +43,15 @@ function AuthorsPage() {
                     <div
                         key={a.id}
                         className="book-card"
-                        onClick={() =>
-                            navigate(`/?author=${a.name}`)
-                        }
-                        style={{ cursor: "pointer" }}
+                        onClick={() => handleAuthorClick(a.name)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleAuthorClick(a.name); }}
                     >
                         {a.name}
                     </div>
                 ))}
             </div>
-
         </div>
     );
 }
