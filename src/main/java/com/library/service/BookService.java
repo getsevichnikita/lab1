@@ -341,7 +341,7 @@ public class BookService {
 
         long totalCopies = sameBooks.size();
         long borrowedCopies = sameBooks.stream()
-                .mapToLong(b -> loanRepository.countByBookIdAndReturnDateIsNull(b.getId()))
+                .mapToLong(b -> loanRepository.countActiveByBookId(b.getId()))
                 .sum();
         long availableCopies = totalCopies - borrowedCopies;
 

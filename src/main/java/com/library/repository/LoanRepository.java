@@ -17,5 +17,6 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
             LocalDate date
     );
 
-    long countByBookIdAndReturnDateIsNull(Long bookId);
+    @Query("SELECT COUNT(l) FROM Loan l WHERE l.book.id = :bookId AND l.returnDate >= CURRENT_DATE")
+    long countActiveByBookId(@Param("bookId") Long bookId);
 }
