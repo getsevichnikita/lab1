@@ -200,7 +200,7 @@ function UploadBookPage() {
           disabled={!isLoggedIn}
           title={!isLoggedIn ? "Login first" : ""}
         >
-          {!isLoggedIn ? "🔒 Upload" : "Upload"}
+          {isLoggedIn ? "Upload" : "You need to authorize to upload books"}
         </button>
       </div>
     </div>
