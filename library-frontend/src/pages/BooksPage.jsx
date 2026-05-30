@@ -74,17 +74,20 @@ function BooksPage() {
         return matchesTitle && matchesAuthor && matchesCategory && matchesYearFrom && matchesYearTo && matchesUrlAuthor && matchesUrlCategory;
     });
 
-    const openBookDetails = async (book) => {
-        setSelectedBook(book);
+    const loadBookStats = async (book) => {
         setBookStats(null);
-
         try {
             const response = await axios.get(`${API_URL}/books/${book.id}/stats`);
             setBookStats(response.data);
         } catch (error) {
             console.error("Failed to load book stats", error);
-            setBookStats({ totalCopies: 1, borrowedCopies: 0, availableCopies: 1 });
+            setBookStats({ totalCopies: 0, borrowedCopies: 0, availableCopies: 0 });
         }
+    };
+
+    const openBookDetails = (book) => {
+        setSelectedBook(book);
+        loadBookStats(book);
     };
 
     const borrowBook = async (bookId) => {
@@ -105,8 +108,8 @@ function BooksPage() {
                 returnDate: returnDate.toISOString().split("T")[0],
             });
             toast.success("Book borrowed");
-            // Обновить статистику
-            if (selectedBook) openBookDetails(selectedBook);
+            // Обновить статистику после успешного займа
+            if (selectedBook) loadBookStats(selectedBook);
         } catch (error) {
             console.error(error);
             toast.error(error.response?.data?.message || "Cannot borrow book");
@@ -175,9 +178,6 @@ function BooksPage() {
                         <p><strong>Year:</strong> {book.publicationYear}</p>
                         <p><strong>Authors:</strong> {(book.authors || []).map((a) => a.name).join(", ")}</p>
                         <p><strong>Categories:</strong> {(book.categories || []).map((c) => c.name).join(", ")}</p>
-                        {book.count > 1 && (
-                            <p className="copy-count">📚 {book.count} copies</p>
-                        )}
                     </div>
                 ))}
             </div>
@@ -187,7 +187,7 @@ function BooksPage() {
                     <div className="modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
                             <h2>{selectedBook.title}</h2>
-                            <button className="close-btn" onClick={closeModal}>×</button>
+                            <button className="close-btn" onClick={closeModal}>x</button>
                         </div>
 
                         <div className="modal-body">
@@ -197,9 +197,9 @@ function BooksPage() {
 
                             {bookStats && (
                                 <div className="book-stats">
-                                    <p>📚 <strong>Total copies:</strong> {bookStats.totalCopies}</p>
-                                    <p>📖 <strong>Borrowed:</strong> {bookStats.borrowedCopies}</p>
-                                    <p>✅ <strong>Available:</strong> {bookStats.availableCopies}</p>
+                                    <p><strong>Total copies:</strong> {bookStats.totalCopies}</p>
+                                    <p><strong>Borrowed:</strong> {bookStats.borrowedCopies}</p>
+                                    <p><strong>Available:</strong> {bookStats.availableCopies}</p>
                                 </div>
                             )}
 
@@ -210,7 +210,7 @@ function BooksPage() {
                                     disabled={!isLoggedIn || bookStats?.availableCopies === 0}
                                     title={!isLoggedIn ? "Login first" : bookStats?.availableCopies === 0 ? "No copies available" : ""}
                                 >
-                                    {!isLoggedIn ? "🔒 Borrow" : bookStats?.availableCopies === 0 ? "Unavailable" : "Borrow"}
+                                    {!isLoggedIn ? "Login to Borrow" : bookStats?.availableCopies === 0 ? "Unavailable" : "Borrow"}
                                 </button>
                                 <button className="borrow-btn" onClick={() => openPdf(selectedBook.id)}>View PDF</button>
                                 <button className="borrow-btn" onClick={() => downloadPdf(selectedBook.id, selectedBook.title)}>Download PDF</button>
