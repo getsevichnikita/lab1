@@ -92,6 +92,8 @@ public class BookController {
                             schema = @Schema(implementation = ErrorResponse.class)
                     ))
     })
+
+    @Transactional
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         bookService.delete(id);
