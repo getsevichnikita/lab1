@@ -386,4 +386,17 @@ button {
     transform: translateY(-3px);
     box-shadow: 0 10px 15px rgba(0,0,0,0.1);
 }
+.home-btn {
+    padding: 16px 32px;
+    background-color: #a58b5e;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 18px;
+    transition: 0.2s;
+}
 
+.home-btn:hover {
+    background-color: #8c744d;
+    transform: translateY(-2px);
+}
