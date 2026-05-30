@@ -131,7 +131,7 @@ public class BookController {
 
     @PostMapping("/upload")
     public BookDTO uploadBook(
-            @RequestPart("book") BookDTOFieldsOwner bookDto,
+            @Valid @RequestPart("book") BookDTOFieldsOwner bookDto,
             @RequestPart("file") MultipartFile file) {
         return bookService.uploadBook(bookDto, file);
     }
