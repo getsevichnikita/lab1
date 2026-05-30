@@ -5,46 +5,43 @@ import { toast } from "react-toastify";
 const API_URL = "https://library-api-v8wu.onrender.com";
 
 function UploadBookPage() {
+  const readerId = localStorage.getItem("readerId");
+  const isLoggedIn = !!readerId;
+
   const [title, setTitle] = useState("");
   const [publicationYear, setPublicationYear] = useState("");
   const [authorInput, setAuthorInput] = useState("");
   const [categoryInput, setCategoryInput] = useState("");
-
   const [selectedAuthors, setSelectedAuthors] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
-
   const [pdfFile, setPdfFile] = useState(null);
 
-  const readerId = localStorage.getItem("readerId");
-
   const addAuthor = () => {
+    if (!isLoggedIn) return;
     if (!authorInput.trim()) return;
-    setSelectedAuthors(prev => [
-      ...prev,
-      { id: Date.now(), name: authorInput.trim() }
-    ]);
+    setSelectedAuthors(prev => [...prev, { id: Date.now(), name: authorInput.trim() }]);
     setAuthorInput("");
   };
 
   const addCategory = () => {
+    if (!isLoggedIn) return;
     if (!categoryInput.trim()) return;
-    setSelectedCategories(prev => [
-      ...prev,
-      { id: Date.now(), name: categoryInput.trim() }
-    ]);
+    setSelectedCategories(prev => [...prev, { id: Date.now(), name: categoryInput.trim() }]);
     setCategoryInput("");
   };
 
   const removeAuthor = (id) => {
+    if (!isLoggedIn) return;
     setSelectedAuthors(prev => prev.filter(a => a.id !== id));
   };
 
   const removeCategory = (id) => {
+    if (!isLoggedIn) return;
     setSelectedCategories(prev => prev.filter(c => c.id !== id));
   };
 
   const uploadBook = async () => {
-    if (!readerId) {
+    if (!isLoggedIn) {
       toast.info("Login first");
       return;
     }
@@ -86,12 +83,11 @@ function UploadBookPage() {
       );
       formData.append("file", pdfFile);
 
-      await axios.post(`${API_URL}/books/upload`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      await axios.post(`${API_URL}/books/upload`, formData);
 
       toast.success("Book uploaded");
 
+      // Очистка формы
       setTitle("");
       setPublicationYear("");
       setSelectedAuthors([]);
@@ -108,43 +104,52 @@ function UploadBookPage() {
     <div className="page">
       <h1>Upload Book</h1>
 
-      <div className="search-panel-vertical">
+      <div className={`search-panel-vertical ${!isLoggedIn ? 'disabled-panel' : ''}`}>
         <input
           placeholder="Title..."
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => isLoggedIn && setTitle(e.target.value)}
+          disabled={!isLoggedIn}
+          title={!isLoggedIn ? "Login first" : ""}
         />
 
         <input
           type="number"
           placeholder="Publication year..."
           value={publicationYear}
-          onChange={(e) => setPublicationYear(e.target.value)}
+          onChange={(e) => isLoggedIn && setPublicationYear(e.target.value)}
+          disabled={!isLoggedIn}
+          title={!isLoggedIn ? "Login first" : ""}
         />
 
         <input
           placeholder="Add author (Enter)..."
           value={authorInput}
-          onChange={(e) => setAuthorInput(e.target.value)}
+          onChange={(e) => isLoggedIn && setAuthorInput(e.target.value)}
           onKeyDown={(e) => {
+            if (!isLoggedIn) return;
             if (e.key === "Enter") {
               e.preventDefault();
               addAuthor();
             }
           }}
+          disabled={!isLoggedIn}
+          title={!isLoggedIn ? "Login first" : ""}
         />
         <div className="tags-container">
           {selectedAuthors.map(a => (
-            <span key={a.id} className="tag">
+            <span key={a.id} className={`tag ${!isLoggedIn ? 'disabled-tag' : ''}`}>
               {a.name}
-              <button
-                type="button"
-                className="tag-remove"
-                onClick={() => removeAuthor(a.id)}
-                aria-label="Remove author"
-              >
-                ×
-              </button>
+              {isLoggedIn && (
+                <button
+                  type="button"
+                  className="tag-remove"
+                  onClick={() => removeAuthor(a.id)}
+                  aria-label="Remove author"
+                >
+                  ×
+                </button>
+              )}
             </span>
           ))}
         </div>
@@ -152,26 +157,31 @@ function UploadBookPage() {
         <input
           placeholder="Add category (Enter)..."
           value={categoryInput}
-          onChange={(e) => setCategoryInput(e.target.value)}
+          onChange={(e) => isLoggedIn && setCategoryInput(e.target.value)}
           onKeyDown={(e) => {
+            if (!isLoggedIn) return;
             if (e.key === "Enter") {
               e.preventDefault();
               addCategory();
             }
           }}
+          disabled={!isLoggedIn}
+          title={!isLoggedIn ? "Login first" : ""}
         />
         <div className="tags-container">
           {selectedCategories.map(c => (
-            <span key={c.id} className="tag">
+            <span key={c.id} className={`tag ${!isLoggedIn ? 'disabled-tag' : ''}`}>
               {c.name}
-              <button
-                type="button"
-                className="tag-remove"
-                onClick={() => removeCategory(c.id)}
-                aria-label="Remove category"
-              >
-                ×
-              </button>
+              {isLoggedIn && (
+                <button
+                  type="button"
+                  className="tag-remove"
+                  onClick={() => removeCategory(c.id)}
+                  aria-label="Remove category"
+                >
+                  ×
+                </button>
+              )}
             </span>
           ))}
         </div>
@@ -179,11 +189,18 @@ function UploadBookPage() {
         <input
           type="file"
           accept="application/pdf"
-          onChange={(e) => setPdfFile(e.target.files[0])}
+          onChange={(e) => isLoggedIn && setPdfFile(e.target.files[0])}
+          disabled={!isLoggedIn}
+          title={!isLoggedIn ? "Login first" : ""}
         />
 
-        <button className="borrow-btn" onClick={uploadBook}>
-          Upload
+        <button
+          className={`borrow-btn ${!isLoggedIn ? 'disabled-btn' : ''}`}
+          onClick={uploadBook}
+          disabled={!isLoggedIn}
+          title={!isLoggedIn ? "Login first" : ""}
+        >
+          {!isLoggedIn ? "🔒 Upload" : "Upload"}
         </button>
       </div>
     </div>
