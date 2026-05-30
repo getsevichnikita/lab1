@@ -27,6 +27,7 @@ public class TaskController {
     private final TaskService taskService;
     private final UnsafeTaskService unsafeTaskService;
 
+    @Operation(summary = "Demonstrate race condition with unsafe counter")
     @GetMapping("/race-test")
     public Map<String, Object> raceTest() throws InterruptedException {
         try (ExecutorService executor = Executors.newFixedThreadPool(50)) {
@@ -49,6 +50,8 @@ public class TaskController {
         }
     }
 
+
+    @Operation(summary = "Demonstrate race condition with safe counter")
     @GetMapping("/atomic-test")
     public Map<String, Object> atomicTest() throws InterruptedException {
         try (ExecutorService executor = Executors.newFixedThreadPool(50)) {
