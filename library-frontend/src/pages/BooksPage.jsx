@@ -122,6 +122,7 @@ function BooksPage() {
     };
 
     const openPdf = async (bookId) => {
+        try {
         const blob = await axios
             .get(`${API_URL}/books/${bookId}/pdf`, {
                 responseType: "blob",
@@ -129,6 +130,10 @@ function BooksPage() {
             .then((res) => res.data);
         const url = window.URL.createObjectURL(blob);
         window.open(url, "_blank");
+        } catch (error) {
+              console.error(error);
+              toast.error("Failed to open PDF");
+            }
     };
 
     const downloadPdf = async (bookId, title) => {

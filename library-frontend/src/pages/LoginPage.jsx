@@ -19,7 +19,6 @@ function LoginPage({ onLogin }) {
         try {
             let res;
 
-            // Пробуем логин
             try {
                 res = await axios.post(`${API_URL}/auth/login`, {
                     name: name,
@@ -27,7 +26,6 @@ function LoginPage({ onLogin }) {
                 });
                 toast.success(`Welcome back, ${name}!`);
             } catch (e) {
-                // Если логин не удался — пробуем регистрацию
                 if (e.response?.status === 401 || e.response?.status === 404) {
                     toast.info("Account not found, creating new one...");
                     res = await axios.post(`${API_URL}/auth/register`, {
@@ -36,7 +34,7 @@ function LoginPage({ onLogin }) {
                     });
                     toast.success(`Account created! Welcome, ${name}!`);
                 } else {
-                    throw e; // Другая ошибка — пробрасываем дальше
+                    throw e;
                 }
             }
 
