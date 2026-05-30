@@ -18,11 +18,17 @@ import com.library.repository.AuthorRepository;
 import com.library.repository.BookRepository;
 import com.library.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.PDFRenderer;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -344,6 +350,25 @@ public class BookService {
                 "borrowedCopies", borrowedCopies,
                 "availableCopies", availableCopies
         );
+    }
+
+    public byte[] getBookCover(Long bookId) {
+        BookPDF pdf = bookPDFRepository.findByBookId(bookId).orElse(null);
+        if (pdf == null || pdf.getFileData() == null) {
+            return new byte[0];
+        }
+
+        try (PDDocument document = Loader.loadPDF(pdf.getFileData())) {
+            PDFRenderer renderer = new PDFRenderer(document);
+            BufferedImage image = renderer.renderImageWithDPI(0, 72); // 0 = первая страница, 72 DPI
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ImageIO.write(image, "png", baos);
+            return baos.toByteArray();
+        } catch (IOException e) {
+            log.error("Failed to extract cover from PDF", e);
+            return new byte[0];
+        }
     }
 
     private void invalidateCache() {

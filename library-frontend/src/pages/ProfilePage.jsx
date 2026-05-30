@@ -2,36 +2,26 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
-import PropTypes from 'prop-types';
 
 const API_URL = "https://library-api-v8wu.onrender.com";
-ProfilePage.propTypes = {
-  readerId: PropTypes.number,
-  readerName: PropTypes.string,
-  onLogout: PropTypes.func.isRequired,
-};
+
 function ProfilePage({ readerId, readerName, onLogout }) {
   const [activeTab, setActiveTab] = useState("loans");
-
   const [loans, setLoans] = useState([]);
   const [books, setBooks] = useState([]);
   const [myBooks, setMyBooks] = useState([]);
-
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [selectedBook, setSelectedBook] = useState(null);
-
   const [editMode, setEditMode] = useState(false);
-
   const [editTitle, setEditTitle] = useState("");
   const [editYear, setEditYear] = useState("");
   const [editAuthors, setEditAuthors] = useState([]);
   const [editCategories, setEditCategories] = useState([]);
   const [newAuthorName, setNewAuthorName] = useState("");
   const [newCategoryName, setNewCategoryName] = useState("");
-
   const [newPdfFile, setNewPdfFile] = useState(null);
+  const [covers, setCovers] = useState({});
   const fileInputRef = useRef(null);
-
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -44,11 +34,26 @@ function ProfilePage({ readerId, readerName, onLogout }) {
     loadData();
   }, [readerId]);
 
+  useEffect(() => {
+    myBooks.forEach(book => loadCover(book.id));
+  }, [myBooks]);
+
   const resetSelection = () => {
     setSelectedLoan(null);
     setSelectedBook(null);
     setEditMode(false);
     setNewPdfFile(null);
+  };
+
+  const loadCover = async (bookId) => {
+    if (covers[bookId] !== undefined) return;
+    try {
+      const response = await axios.get(`${API_URL}/books/${bookId}/cover`, { responseType: "blob" });
+      const url = URL.createObjectURL(response.data);
+      setCovers(prev => ({ ...prev, [bookId]: url }));
+    } catch (error) {
+      setCovers(prev => ({ ...prev, [bookId]: null }));
+    }
   };
 
   const loadData = async () => {
@@ -57,21 +62,14 @@ function ProfilePage({ readerId, readerName, onLogout }) {
         axios.get(`${API_URL}/loans/reader?readerId=${readerId}&page=0&size=100`),
         axios.get(`${API_URL}/books?page=0&size=100`),
       ]);
-
-      const allBooks = Array.isArray(booksRes.data)
-        ? booksRes.data
-        : (booksRes.data.content || []);
-
+      const allBooks = Array.isArray(booksRes.data) ? booksRes.data : (booksRes.data.content || []);
       setLoans(loansRes.data || []);
       setBooks(allBooks);
-
       const currentReaderId = readerId ? Number(readerId) : null;
-
       const my = allBooks.filter(b => {
         const bookOwnerId = b.ownerId != null ? Number(b.ownerId) : null;
         return bookOwnerId !== null && bookOwnerId === currentReaderId;
       });
-
       setMyBooks(my);
     } catch (error) {
       console.error(error);
@@ -85,9 +83,7 @@ function ProfilePage({ readerId, readerName, onLogout }) {
     return book ? book.title : "Unknown";
   };
 
-  const myLoans = loans.filter(
-    loan => loan?.readerId != null && Number(loan.readerId) === Number(readerId)
-  );
+  const myLoans = loans.filter(loan => loan?.readerId != null && Number(loan.readerId) === Number(readerId));
 
   const cancelLoan = async (loanId) => {
     try {
@@ -137,10 +133,7 @@ function ProfilePage({ readerId, readerName, onLogout }) {
     setNewAuthorName("");
   };
 
-  const removeAuthor = (index) => {
-    setEditAuthors(prev => prev.filter((_, i) => i !== index));
-  };
-
+  const removeAuthor = (index) => setEditAuthors(prev => prev.filter((_, i) => i !== index));
   const addCategory = () => {
     const trimmed = newCategoryName.trim();
     if (!trimmed) return;
@@ -152,9 +145,7 @@ function ProfilePage({ readerId, readerName, onLogout }) {
     setNewCategoryName("");
   };
 
-  const removeCategory = (index) => {
-    setEditCategories(prev => prev.filter((_, i) => i !== index));
-  };
+  const removeCategory = (index) => setEditCategories(prev => prev.filter((_, i) => i !== index));
 
   const ensureEntityExists = async (type, name) => {
     try {
@@ -169,20 +160,14 @@ function ProfilePage({ readerId, readerName, onLogout }) {
 
   const updateBook = async () => {
     try {
-      const authorIds = await Promise.all(
-        editAuthors.map(async (a) => {
-          if (a.id) return a.id;
-          const newId = await ensureEntityExists("author", a.name);
-          return newId;
-        })
-      );
-      const categoryIds = await Promise.all(
-        editCategories.map(async (c) => {
-          if (c.id) return c.id;
-          const newId = await ensureEntityExists("category", c.name);
-          return newId;
-        })
-      );
+      const authorIds = await Promise.all(editAuthors.map(async (a) => {
+        if (a.id) return a.id;
+        return await ensureEntityExists("author", a.name);
+      }));
+      const categoryIds = await Promise.all(editCategories.map(async (c) => {
+        if (c.id) return c.id;
+        return await ensureEntityExists("category", c.name);
+      }));
 
       await axios.put(`${API_URL}/books/${selectedBook.id}`, {
         title: editTitle,
@@ -203,10 +188,7 @@ function ProfilePage({ readerId, readerName, onLogout }) {
         }
       }
 
-      const updatedBook = {
-        ...selectedBook,
-        title: editTitle,
-        publicationYear: Number(editYear),
+      const updatedBook = { ...selectedBook, title: editTitle, publicationYear: Number(editYear),
         authors: editAuthors.map((a, idx) => ({ id: authorIds[idx], name: a.name })),
         categories: editCategories.map((c, idx) => ({ id: categoryIds[idx], name: c.name })),
       };
@@ -225,10 +207,8 @@ function ProfilePage({ readerId, readerName, onLogout }) {
 
   const openPdf = async (bookId, download = false) => {
     try {
-      const res = await axios.get(`${API_URL}/books/${bookId}/pdf`, {
-        responseType: "blob",
-      });
-    const url = globalThis.URL.createObjectURL(res.data);
+      const res = await axios.get(`${API_URL}/books/${bookId}/pdf`, { responseType: "blob" });
+      const url = globalThis.URL.createObjectURL(res.data);
       if (download) {
         const a = document.createElement("a");
         a.href = url;
@@ -247,18 +227,12 @@ function ProfilePage({ readerId, readerName, onLogout }) {
     <div className="page">
       <div className="profile-header">
         <h1>My Profile — {readerName}</h1>
-        <button className="logout-btn" onClick={handleLogout}>
-          Logout
-        </button>
+        <button className="logout-btn" onClick={handleLogout}>Logout</button>
       </div>
 
       <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-        <button className="borrow-btn" onClick={() => { setActiveTab("loans"); resetSelection(); }}>
-          My Loans
-        </button>
-        <button className="borrow-btn" onClick={() => { setActiveTab("books"); resetSelection(); }}>
-          My Books
-        </button>
+        <button className="borrow-btn" onClick={() => { setActiveTab("loans"); resetSelection(); }}>My Loans</button>
+        <button className="borrow-btn" onClick={() => { setActiveTab("books"); resetSelection(); }}>My Books</button>
       </div>
 
       {activeTab === "loans" && (
@@ -266,18 +240,21 @@ function ProfilePage({ readerId, readerName, onLogout }) {
           <h2>My Loans</h2>
           <div className="books-grid">
             {myLoans.map(loan => (
-              <div
-                key={loan.id}
-                className="book-card"
-                onClick={() => {
-                  setSelectedLoan(loan);
-                  setSelectedBook(getBookById(loan.bookId));
-                  setEditMode(false);
-                }}
-              >
-                <h3>{getBookTitle(loan.bookId)}</h3>
-                <p>Issue: {loan.issueDate}</p>
-                <p>Return: {loan.returnDate || "not returned"}</p>
+              <div key={loan.id} className="book-card" onClick={() => { setSelectedLoan(loan); setSelectedBook(getBookById(loan.bookId)); setEditMode(false); }}>
+                <div className="book-cover">
+                  {covers[loan.bookId] ? (
+                    <img src={covers[loan.bookId]} alt={getBookTitle(loan.bookId)} />
+                  ) : covers[loan.bookId] === null ? (
+                    <div className="no-cover">No Cover</div>
+                  ) : (
+                    <div className="loading-cover">Loading...</div>
+                  )}
+                </div>
+                <div className="book-info">
+                  <h3>{getBookTitle(loan.bookId)}</h3>
+                  <p>Issue: {loan.issueDate}</p>
+                  <p>Return: {loan.returnDate || "not returned"}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -289,17 +266,20 @@ function ProfilePage({ readerId, readerName, onLogout }) {
           <h2>My Books</h2>
           <div className="books-grid">
             {myBooks.map(book => (
-              <div
-                key={book.id}
-                className="book-card"
-                onClick={() => {
-                  setSelectedBook(book);
-                  setSelectedLoan(null);
-                  setEditMode(false);
-                }}
-              >
-                <h3>{book.title}</h3>
-                <p>Year: {book.publicationYear}</p>
+              <div key={book.id} className="book-card" onClick={() => { setSelectedBook(book); setSelectedLoan(null); setEditMode(false); }}>
+                <div className="book-cover">
+                  {covers[book.id] ? (
+                    <img src={covers[book.id]} alt={book.title} />
+                  ) : covers[book.id] === null ? (
+                    <div className="no-cover">No Cover</div>
+                  ) : (
+                    <div className="loading-cover">Loading...</div>
+                  )}
+                </div>
+                <div className="book-info">
+                  <h3>{book.title}</h3>
+                  <p>Year: {book.publicationYear}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -311,11 +291,8 @@ function ProfilePage({ readerId, readerName, onLogout }) {
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>{editMode ? "Edit Book" : selectedBook.title}</h2>
-              <button className="close-btn" onClick={resetSelection}>
-                ×
-              </button>
+              <button className="close-btn" onClick={resetSelection}>x</button>
             </div>
-
             <div className="modal-body">
               {editMode ? (
                 <div className="edit-form">
@@ -323,75 +300,35 @@ function ProfilePage({ readerId, readerName, onLogout }) {
                   <input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
                   <label>Year:</label>
                   <input type="number" value={editYear} onChange={(e) => setEditYear(e.target.value)} />
-
                   <div className="form-section">
                     <label><strong>Authors:</strong></label>
                     <div className="tags-container">
                       {editAuthors.map((author, idx) => (
-                        <span key={idx} className="tag">
-                          {author.name}
-                          <button
-                            type="button"
-                            onClick={() => removeAuthor(idx)}
-                            className="tag-remove"
-                            aria-label="Remove author"
-                          >
-                            ×
-                          </button>
+                        <span key={idx} className="tag">{author.name}
+                          <button type="button" onClick={() => removeAuthor(idx)} className="tag-remove">x</button>
                         </span>
                       ))}
                     </div>
-                    <input
-                      value={newAuthorName}
-                      onChange={(e) => setNewAuthorName(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          addAuthor();
-                        }
-                      }}
-                      placeholder="New author name"
-                    />
+                    <input value={newAuthorName} onChange={(e) => setNewAuthorName(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addAuthor(); } }}
+                      placeholder="New author name" />
                   </div>
-
                   <div className="form-section">
                     <label><strong>Categories:</strong></label>
                     <div className="tags-container">
                       {editCategories.map((cat, idx) => (
-                        <span key={idx} className="tag">
-                          {cat.name}
-                          <button
-                            type="button"
-                            onClick={() => removeCategory(idx)}
-                            className="tag-remove"
-                            aria-label="Remove category"
-                          >
-                            ×
-                          </button>
+                        <span key={idx} className="tag">{cat.name}
+                          <button type="button" onClick={() => removeCategory(idx)} className="tag-remove">x</button>
                         </span>
                       ))}
                     </div>
-                    <input
-                      value={newCategoryName}
-                      onChange={(e) => setNewCategoryName(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          addCategory();
-                        }
-                      }}
-                      placeholder="New category name"
-                    />
+                    <input value={newCategoryName} onChange={(e) => setNewCategoryName(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addCategory(); } }}
+                      placeholder="New category name" />
                   </div>
-
                   <div className="form-section">
                     <label><strong>Replace PDF:</strong></label>
-                    <input
-                      type="file"
-                      accept=".pdf"
-                      ref={fileInputRef}
-                      onChange={(e) => setNewPdfFile(e.target.files[0])}
-                    />
+                    <input type="file" accept=".pdf" ref={fileInputRef} onChange={(e) => setNewPdfFile(e.target.files[0])} />
                   </div>
                 </div>
               ) : (
@@ -409,43 +346,26 @@ function ProfilePage({ readerId, readerName, onLogout }) {
                 </>
               )}
             </div>
-
             <div className="modal-actions">
               {selectedLoan && !editMode && (
-                <button className="borrow-btn" onClick={() => cancelLoan(selectedLoan.id)}>
-                  Cancel Loan
-                </button>
+                <button className="borrow-btn" onClick={() => cancelLoan(selectedLoan.id)}>Cancel Loan</button>
               )}
-
               {!editMode && (
                 <>
-                  <button className="borrow-btn" onClick={() => openPdf(selectedBook.id, false)}>
-                    View PDF
-                  </button>
-                  <button className="borrow-btn" onClick={() => openPdf(selectedBook.id, true)}>
-                    Download
-                  </button>
+                  <button className="borrow-btn" onClick={() => openPdf(selectedBook.id, false)}>View PDF</button>
+                  <button className="borrow-btn" onClick={() => openPdf(selectedBook.id, true)}>Download</button>
                   {activeTab === "books" && (
                     <>
-                      <button className="borrow-btn" onClick={startEdit}>
-                        Edit
-                      </button>
-                      <button className="borrow-btn" onClick={() => deleteBook(selectedBook.id)}>
-                        Delete
-                      </button>
+                      <button className="borrow-btn" onClick={startEdit}>Edit</button>
+                      <button className="borrow-btn" onClick={() => deleteBook(selectedBook.id)}>Delete</button>
                     </>
                   )}
                 </>
               )}
-
               {editMode && (
                 <>
-                  <button className="borrow-btn" onClick={updateBook}>
-                    Save
-                  </button>
-                  <button className="borrow-btn" onClick={() => setEditMode(false)}>
-                    Close
-                  </button>
+                  <button className="borrow-btn" onClick={updateBook}>Save</button>
+                  <button className="borrow-btn" onClick={() => setEditMode(false)}>Close</button>
                 </>
               )}
             </div>

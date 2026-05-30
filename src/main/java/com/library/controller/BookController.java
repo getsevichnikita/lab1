@@ -170,4 +170,15 @@ public class BookController {
         Map<String, Object> stats = bookService.getBookStats(id);
         return ResponseEntity.ok(stats);
     }
+
+    @GetMapping("/{id}/cover")
+    public ResponseEntity<byte[]> getCover(@PathVariable Long id) {
+        byte[] cover = bookService.getBookCover(id);
+        if (cover.length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_PNG)
+                .body(cover);
+    }
 }

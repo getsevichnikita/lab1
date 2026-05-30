@@ -227,14 +227,14 @@ function UploadBookPage() {
           title={!isLoggedIn ? "You need to login first" : ""}
         />
 
-        <button
-          className={`borrow-btn ${!isLoggedIn ? 'disabled-btn' : ''}`}
-          onClick={uploadBook}
-          disabled={!isLoggedIn}
-          title={!isLoggedIn ? "You need to login first" : ""}
-        >
-          Upload
-        </button>
+     <button
+       className={`borrow-btn ${!isLoggedIn ? 'disabled-btn' : ''}`}
+       onClick={uploadBook}
+       disabled={!isLoggedIn}
+       title={!isLoggedIn ? "You need to login first" : "Upload book to library"}
+     >
+       Upload
+     </button>
       </div>
     </div>
   );

@@ -11,6 +11,7 @@ function BooksPage() {
     const [books, setBooks] = useState([]);
     const [selectedBook, setSelectedBook] = useState(null);
     const [bookStats, setBookStats] = useState(null);
+    const [covers, setCovers] = useState({});
 
     const [searchTitle, setSearchTitle] = useState("");
     const [searchAuthor, setSearchAuthor] = useState("");
@@ -30,6 +31,10 @@ function BooksPage() {
         loadData();
     }, []);
 
+    useEffect(() => {
+        books.forEach(book => loadCover(book.id));
+    }, [books]);
+
     const loadData = async () => {
         try {
             const booksData = await getBooks();
@@ -38,6 +43,19 @@ function BooksPage() {
             setBooks(grouped);
         } catch (error) {
             console.error(error);
+        }
+    };
+
+    const loadCover = async (bookId) => {
+        if (covers[bookId] !== undefined) return;
+        try {
+            const response = await axios.get(`${API_URL}/books/${bookId}/cover`, {
+                responseType: "blob"
+            });
+            const url = URL.createObjectURL(response.data);
+            setCovers(prev => ({ ...prev, [bookId]: url }));
+        } catch (error) {
+            setCovers(prev => ({ ...prev, [bookId]: null }));
         }
     };
 
@@ -108,7 +126,6 @@ function BooksPage() {
                 returnDate: returnDate.toISOString().split("T")[0],
             });
             toast.success("Book borrowed");
-            // Обновить статистику после успешного займа
             if (selectedBook) loadBookStats(selectedBook);
         } catch (error) {
             console.error(error);
@@ -174,10 +191,20 @@ function BooksPage() {
                         className="book-card"
                         onClick={() => openBookDetails(book)}
                     >
-                        <h2>{book.title}</h2>
-                        <p><strong>Year:</strong> {book.publicationYear}</p>
-                        <p><strong>Authors:</strong> {(book.authors || []).map((a) => a.name).join(", ")}</p>
-                        <p><strong>Categories:</strong> {(book.categories || []).map((c) => c.name).join(", ")}</p>
+                        <div className="book-cover">
+                            {covers[book.id] ? (
+                                <img src={covers[book.id]} alt={book.title} />
+                            ) : covers[book.id] === null ? (
+                                <div className="no-cover">No Cover</div>
+                            ) : (
+                                <div className="loading-cover">Loading...</div>
+                            )}
+                        </div>
+                        <div className="book-info">
+                            <h2>{book.title}</h2>
+                            <p><strong>Year:</strong> {book.publicationYear}</p>
+                            <p><strong>Authors:</strong> {(book.authors || []).map((a) => a.name).join(", ")}</p>
+                        </div>
                     </div>
                 ))}
             </div>
