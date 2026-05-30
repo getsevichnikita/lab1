@@ -10,11 +10,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 @RestController
 @RequestMapping("/tasks")
 @RequiredArgsConstructor
@@ -25,55 +20,6 @@ import java.util.concurrent.Executors;
 public class TaskController {
 
     private final TaskService taskService;
-    private final UnsafeTaskService unsafeTaskService;
-
-    @Operation(summary = "Demonstrate race condition with unsafe counter")
-    @GetMapping("/race-test")
-    public Map<String, Object> raceTest() throws InterruptedException {
-        try (ExecutorService executor = Executors.newFixedThreadPool(50)) {
-            CountDownLatch latch = new CountDownLatch(1000);
-
-            for (int i = 0; i < 1000; i++) {
-                executor.submit(() -> {
-                    unsafeTaskService.createTask();
-                    latch.countDown();
-                });
-            }
-
-            latch.await();
-
-            return Map.of(
-                    "expected", 1000,
-                    "actual", unsafeTaskService.getTasksCount(),
-                    "lost", 1000 - unsafeTaskService.getTasksCount()
-            );
-        }
-    }
-
-
-    @Operation(summary = "Demonstrate race condition with safe counter")
-    @GetMapping("/atomic-test")
-    public Map<String, Object> atomicTest() throws InterruptedException {
-        try (ExecutorService executor = Executors.newFixedThreadPool(50)) {
-            int initial = taskService.getTasksCount();
-            CountDownLatch latch = new CountDownLatch(1000);
-
-            for (int i = 0; i < 1000; i++) {
-                executor.submit(() -> {
-                    taskService.createTask();
-                    latch.countDown();
-                });
-            }
-
-            latch.await();
-
-            return Map.of(
-                    "expected", 1000,
-                    "actual", taskService.getTasksCount() - initial,
-                    "lost", 0
-            );
-        }
-    }
 
     @ApiResponses(value = {
             @ApiResponse(
